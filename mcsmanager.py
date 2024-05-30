@@ -53,7 +53,7 @@ async def stop():
 
         await page.wait_for_url("https://admin.tntcraft.xyz/#/")
 
-        logging.info("Starting Vanilla in MCS portal")        
+        logging.info("Stopping Vanilla in MCS portal")        
         await page.goto("https://admin.tntcraft.xyz/#/instances/terminal?daemonId=4bb133e0384b40c5aa2504c697dbfccc&instanceId=cde36cc7b6d0464792199b284cd4460b")
 
         await page.get_by_role("button", name="Stop").click()

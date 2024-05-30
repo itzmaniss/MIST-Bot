@@ -26,20 +26,25 @@ def format_timedelta(delta):
     minutes, seconds = divmod(remainder, 60)
     return f"{hours}h {minutes}m {seconds}s"
 
+def get_now() -> str:
+    return datetime.now().time().strftime('%H:%M')
+
 
 @client.event
-async def on_ready():  
+async def on_ready() -> None:  
     logger.info("Bot is Online and Ready!")
 
 @client.command( name = "test")
-async def test(ctx):
+async def test(ctx) -> None:
     logging.info(ctx)
     logging.info(ctx.author.id)
 
 @client.command(name = "start")
-async def start(ctx):
+async def start(ctx) -> None:
     global last_start
     global allowed_users
+
+    logging.info(f"{ctx.author} has used to start command at {get_now()}")
 
     if not ctx.channel.name == "minecraft": 
         logging.error(f"Wrong Channel. {ctx.channel.name} was used instead.")
@@ -58,7 +63,7 @@ async def start(ctx):
     try:
         await mcs.start()
 
-        message = f"Vanilla has been started at {datetime.now().time().strftime('%H:%M')}"
+        message = f"Vanilla has been started at {get_now()}"
         logging.info(message)
         await ctx.send(message)
         if ctx.author.id not in allowed_users:
@@ -70,7 +75,6 @@ async def start(ctx):
 
 @client.command(name = "stop")
 async def stop(ctx):
-    global last_stop
     global allowed_users
 
     if not ctx.channel.name == "minecraft": 
@@ -79,26 +83,23 @@ async def stop(ctx):
         raise Exception("Incorrect Channel")
 
     if ctx.author.id not in allowed_users:
-        if (datetime.now() - last_stop) <= timedelta(minutes=2):
-            error_message = f"It has only been {format_timedelta(datetime.now() - last_start)} since the server was last started by as user please try again at {(last_start + timedelta(hours=1)).strftime('%Y-%m-%d %H:%M')}"
-            logging.error(error_message)
-            await ctx.send(error_message)
-            raise Exception("Spamming Stop!")
+        error_message = f"You are not authorised to use this command."
+        await ctx.send(error_message)
+        logging.error(f"Unathorised use of stop command!: {ctx.author}")
+        raise Exception("Unauthorised Stop!")
 
     logging.info("stopping vanilla")
 
     try:
         await mcs.stop()
 
-        message = f"Vanilla has been stopped at {datetime.now().time().strftime('%H:%M')}"
+        message = f"Vanilla has been stopped at {get_now()}"
         logging.info(message)
         await ctx.send(message)
-        if ctx.author.id not in allowed_users:
-            last_start = datetime.now()
 
     except Exception as e:
         logging.error(e)
         await ctx.send(f"Stop process has failed.")
 
-logging.info(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}  Starting Bot...")
+logging.info(f"{get_now}  Starting Bot...")
 client.run(os.getenv("discord_token"))

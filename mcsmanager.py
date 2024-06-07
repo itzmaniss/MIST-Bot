@@ -9,13 +9,18 @@ logging.basicConfig(filename="MCM.log", level=logging.INFO)
 
 dotenv.load_dotenv()
 
+daemonID = os.getenv('daemonID')
+instanceID = os.getenv('instanceID')
+
 async def start():
     logging.info("Starting up browser")
     async with async_playwright() as p:
-        browser = await p.webkit.launch()
+        browser = await p.webkit.launch(headless=False)
         page = await browser.new_page()
         logging.info("Visiting MCS portal")
-        await page.goto("https://admin.tntcraft.xyz/#/login")
+        await page.goto("localhost:23333/#/login")
+
+        
 
         logging.info("Logging In")
         await page.get_by_placeholder("Username").fill(os.getenv("UID"))
@@ -24,10 +29,10 @@ async def start():
 
         await page.get_by_text("Confirm").click()
 
-        await page.wait_for_url("https://admin.tntcraft.xyz/#/")
+        await page.wait_for_url("http://localhost:23333/#/")
 
         logging.info("Starting Vanilla in MCS portal")        
-        await page.goto("https://admin.tntcraft.xyz/#/instances/terminal?daemonId=4bb133e0384b40c5aa2504c697dbfccc&instanceId=cde36cc7b6d0464792199b284cd4460b")
+        await page.goto(f"localhost:23333/#/instances/terminal?daemonId={daemonID}&instanceId={instanceID}")
 
         await page.get_by_role("button", name="Start").click()
 
@@ -42,7 +47,7 @@ async def stop():
         browser = await p.webkit.launch()
         page = await browser.new_page()
         logging.info("Visiting MCS portal")
-        await page.goto("https://admin.tntcraft.xyz/#/login")
+        await page.goto("localhost:23333/#/login")
 
         logging.info("Logging In")
         await page.get_by_placeholder("Username").fill(os.getenv("UID"))
@@ -51,10 +56,10 @@ async def stop():
 
         await page.get_by_text("Confirm").click()
 
-        await page.wait_for_url("https://admin.tntcraft.xyz/#/")
+        await page.wait_for_url("localhost:23333/#/")
 
         logging.info("Stopping Vanilla in MCS portal")        
-        await page.goto("https://admin.tntcraft.xyz/#/instances/terminal?daemonId=4bb133e0384b40c5aa2504c697dbfccc&instanceId=cde36cc7b6d0464792199b284cd4460b")
+        await page.goto(f"localhost:23333/#/instances/terminal?daemonId={daemonID}&instanceId={instanceID}")
 
         await page.get_by_role("button", name="Stop").click()
 

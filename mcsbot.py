@@ -2,6 +2,7 @@ import discord
 import os
 import logging
 import mcsmanager as mcs
+import httpx
 
 from discord.ext import commands
 from dotenv import load_dotenv
@@ -19,6 +20,8 @@ client = commands.Bot(intents=intents, command_prefix = "%")
 last_stop = datetime.now() - timedelta(hours = 1)
 last_start = datetime.now() - timedelta(hours = 1)
 allowed_users = (304976615723499533, 476162085827379231)
+
+url = "https://admin.tntcraft.xyz/api"
 
 def format_timedelta(delta):
     total_seconds = int(delta.total_seconds())
@@ -43,6 +46,7 @@ async def test(ctx) -> None:
 async def start(ctx) -> None:
     global last_start
     global allowed_users
+    global url
 
     logging.info(f"{ctx.author} has used to start command at {get_now()}")
 
@@ -61,7 +65,17 @@ async def start(ctx) -> None:
     logging.info("starting vanilla")
 
     try:
-        await mcs.start()
+        params = {
+            "apikey": os.getenv("api_key"),
+            "uuid": os.getenv("instance_id"),
+            "daemonId": os.getenv("daemon_id")
+        }
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url=url+"/protected_instance/open", params=params)
+
+        if response.status_code != 200:
+            await ctx.send("Contact KKYH to turn on machine then try again.")
+            raise Exception("Machine is turned off")
 
         message = f"Vanilla has been started at {get_now()}"
         logging.info(message)
@@ -91,7 +105,17 @@ async def stop(ctx):
     logging.info("stopping vanilla")
 
     try:
-        await mcs.stop()
+        params = {
+            "apikey": os.getenv("api_key"),
+            "uuid": os.getenv("instance_id"),
+            "daemonId": os.getenv("daemon_id")
+        }
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url=url+"/protected_instance/stop", params=params)
+
+        if response.status_code != 200:
+            await ctx.send("I also dk why it never work... never bothered testing :)")
+            raise Exception("IDK WHATS WRONG ALSO!!!")
 
         message = f"Vanilla has been stopped at {get_now()}"
         logging.info(message)

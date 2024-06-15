@@ -1,6 +1,7 @@
 .env
 MCM.log
 MCMDB.zip
+mcsmanager.py
 
 __pycache__/
 venv/

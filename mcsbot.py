@@ -1,7 +1,6 @@
 import discord
 import os
 import logging
-import mcsmanager as mcs
 import httpx
 
 from discord.ext import commands

@@ -71,9 +71,10 @@ async def start(ctx) -> None:
         }
         async with httpx.AsyncClient() as client:
             response = await client.get(url=url+"/protected_instance/open", params=params)
-
-        if response.status_code != 200:
+        if response.status_code == 500:
             await ctx.send("Contact KKYH to turn on machine then try again.")
+            raise Exception("Machine is turned off")
+        elif response.status_code != 200:
             raise Exception("Machine is turned off")
 
         message = f"Vanilla has been started at {get_now()}"

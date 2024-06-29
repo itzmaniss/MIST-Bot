@@ -47,11 +47,15 @@ async def start(ctx) -> None:
     global allowed_users
     global url
 
-    logging.info(f"{ctx.author} has used to start command at {get_now()}")
+    
+    allowed_channels ={"minecraft": "Vanilla", 
+                       "atm9": "ATM9"}
 
-    if not ctx.channel.name == "minecraft": 
+    logging.info(f"{ctx.author} has used to start command at {get_now()} for {allowed_channels[ctx.channel.name]}")
+
+    if ctx.channel.name not in allowed_channels: 
         logging.error(f"Wrong Channel. {ctx.channel.name} was used instead.")
-        await ctx.send(f"Please use the correct channel: minecraft")
+        await ctx.send(f"Please use the correct channel: {allowed_channels}")
         raise Exception("Incorrect Channel")
 
     if ctx.author.id not in allowed_users:
@@ -61,13 +65,13 @@ async def start(ctx) -> None:
             await ctx.send(error_message)
             raise Exception("Spamming Start!")
 
-    logging.info("starting vanilla")
+    logging.info("starting server " + allowed_channels[ctx.channel.name])
 
     try:
         params = {
             "apikey": os.getenv("api_key"),
-            "uuid": os.getenv("instance_id"),
-            "daemonId": os.getenv("daemon_id")
+            "uuid": os.getenv(f"instance_id_{ctx.channel.name}"),
+            "daemonId": os.getenv(f"daemon_id_{ctx.channel.name}")
         }
         async with httpx.AsyncClient() as client:
             response = await client.get(url=url+"/protected_instance/open", params=params)
@@ -77,7 +81,7 @@ async def start(ctx) -> None:
         elif response.status_code != 200:
             raise Exception("Machine is turned off")
 
-        message = f"Vanilla has been started at {get_now()}"
+        message = allowed_channels[ctx.channel.name] + f" has been started at {get_now()}"
         logging.info(message)
         await ctx.send(message)
         if ctx.author.id not in allowed_users:

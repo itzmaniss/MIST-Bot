@@ -6,6 +6,8 @@ import httpx
 from discord.ext import commands
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
+from helper import *
+
 
 load_dotenv()
 
@@ -14,13 +16,17 @@ logging.basicConfig(filename="MCM.log", level=logging.INFO)
 
 intents = discord.Intents.default()
 intents.message_content = True
-client = commands.Bot(intents=intents, command_prefix = "%")
+client = commands.Bot(intents=intents, command_prefix="%")
 
-last_stop = datetime.now() - timedelta(hours = 1)
-last_start = datetime.now() - timedelta(hours = 1)
+last_stop = datetime.now() - timedelta(hours=1)
+last_start = datetime.now() - timedelta(hours=1)
+
 allowed_users = (304976615723499533, 476162085827379231)
+allowed_channels = {"minecraft": "Vanilla", "atm9": "ATM9"}
+
 
 url = "https://admin.tntcraft.xyz/api"
+
 
 def format_timedelta(delta):
     total_seconds = int(delta.total_seconds())
@@ -28,32 +34,34 @@ def format_timedelta(delta):
     minutes, seconds = divmod(remainder, 60)
     return f"{hours}h {minutes}m {seconds}s"
 
+
 def get_now() -> str:
-    return datetime.now().time().strftime('%H:%M')
+    return datetime.now().time().strftime("%H:%M")
 
 
 @client.event
-async def on_ready() -> None:  
+async def on_ready() -> None:
     logger.info("Bot is Online and Ready!")
 
-@client.command( name = "test")
+
+@client.command(name="test")
 async def test(ctx) -> None:
     logging.info(ctx)
     logging.info(ctx.author.id)
 
-@client.command(name = "start")
+
+@client.command(name="start")
 async def start(ctx) -> None:
     global last_start
     global allowed_users
     global url
+    global allowed_channels
 
-    
-    allowed_channels ={"minecraft": "Vanilla", 
-                       "atm9": "ATM9"}
+    logging.info(
+        f"{ctx.author} has used to start command at {get_now()} for {allowed_channels[ctx.channel.name]}"
+    )
 
-    logging.info(f"{ctx.author} has used to start command at {get_now()} for {allowed_channels[ctx.channel.name]}")
-
-    if ctx.channel.name not in allowed_channels: 
+    if ctx.channel.name not in allowed_channels:
         logging.error(f"Wrong Channel. {ctx.channel.name} was used instead.")
         await ctx.send(f"Please use the correct channel: {allowed_channels}")
         raise Exception("Incorrect Channel")
@@ -71,17 +79,32 @@ async def start(ctx) -> None:
         params = {
             "apikey": os.getenv("api_key"),
             "uuid": os.getenv(f"instance_id_{ctx.channel.name}"),
-            "daemonId": os.getenv(f"daemon_id_{ctx.channel.name}")
+            "daemonId": os.getenv(f"daemon_id_{ctx.channel.name}"),
         }
         async with httpx.AsyncClient() as client:
-            response = await client.get(url=url+"/protected_instance/open", params=params)
+            response = await client.get(
+                url=url + "/protected_instance/open", params=params
+            )
         if response.status_code == 500:
-            await ctx.send("Contact KKYH to turn on machine then try again.")
-            raise Exception("Machine is turned off")
+            if (
+                response.json()["data"]
+                == "The instance is running and cannot be started again"
+            ):
+                await ctx.send(
+                    "you idot, the serer is alreadu on. stop spamning or i come to ur house and slap u"
+                )
+                raise Exception("idot turning on server thats alr on")
+            else:
+                await ctx.send(
+                    "Contact <@304976615723499533> or <@476162085827379231> to turn on machine then try again."
+                )
+                raise Exception("Machine is turned off")
         elif response.status_code != 200:
             raise Exception("Machine is turned off")
 
-        message = allowed_channels[ctx.channel.name] + f" has been started at {get_now()}"
+        message = (
+            allowed_channels[ctx.channel.name] + f" has been started at {get_now()}"
+        )
         logging.info(message)
         await ctx.send(message)
         if ctx.author.id not in allowed_users:
@@ -91,43 +114,71 @@ async def start(ctx) -> None:
         logging.error(e)
         await ctx.send(f"Start process has failed.")
 
-@client.command(name = "stop")
+
+@client.command(name="stop")
 async def stop(ctx):
     global allowed_users
+    global allowed_channels
 
-    if not ctx.channel.name == "minecraft": 
+    if ctx.channel.name not in allowed_channels:
         logging.error(f"Wrong Channel. {ctx.channel.name} was used instead.")
-        await ctx.send(f"Please use the correct channel: minecraft")
+        await ctx.send(f"Please use the correct channel " + str(allowed_channels))
         raise Exception("Incorrect Channel")
 
-    if ctx.author.id not in allowed_users:
+    if ctx.channel.name == "minecraft" and ctx.author.id not in allowed_users:
         error_message = f"You are not authorised to use this command."
         await ctx.send(error_message)
         logging.error(f"Unathorised use of stop command!: {ctx.author}")
         raise Exception("Unauthorised Stop!")
 
-    logging.info("stopping vanilla")
+    logging.info("stopping " + allowed_channels[ctx.channel.name])
 
     try:
         params = {
             "apikey": os.getenv("api_key"),
-            "uuid": os.getenv("instance_id"),
-            "daemonId": os.getenv("daemon_id")
+            "uuid": os.getenv(f"instance_id_{ctx.channel.name}"),
+            "daemonId": os.getenv(f"daemon_id_{ctx.channel.name}"),
         }
-        async with httpx.AsyncClient() as client:
-            response = await client.get(url=url+"/protected_instance/stop", params=params)
+        if not players_online(allowed_channels[ctx.channel.name]):
+            async with httpx.AsyncClient() as client:
+                response = await client.get(
+                    url=url + "/protected_instance/stop", params=params
+                )
+        else:
+            message = "Unable to stop. There are players online."
+            await ctx.send(message)
+            raise Exception(message)
 
         if response.status_code != 200:
-            await ctx.send("I also dk why it never work... never bothered testing :)")
-            raise Exception("IDK WHATS WRONG ALSO!!!")
+            if "The remote node is unavailable!" in response.json()["data"]:
+                await ctx.send(
+                    "the machine is of idiot, can u not spam or misuse the command pls."
+                )
+                raise Exception("machine off")
+            elif (
+                response.json()["data"]
+                == "The instance is not running and cannot be stopped."
+            ):
+                await ctx.send(
+                    "Verily, thou dolt, the server hath long since been extinguished!"
+                )
+                raise Exception("stupid")
+            else:
+                await ctx.send(
+                    "I also dk why it never work... never bothered testing :)"
+                )
+                raise Exception("IDK WHATS WRONG ALSO!!!")
 
-        message = f"Vanilla has been stopped at {get_now()}"
+        message = (
+            allowed_channels[ctx.channel.name] + f" has been stopped at {get_now()}"
+        )
         logging.info(message)
         await ctx.send(message)
 
     except Exception as e:
         logging.error(e)
         await ctx.send(f"Stop process has failed.")
+
 
 logging.info(f"{get_now}  Starting Bot...")
 client.run(os.getenv("discord_token"))

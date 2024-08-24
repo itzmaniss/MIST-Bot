@@ -22,7 +22,7 @@ def players_online(server_name: str) -> bool:
 
     server = JavaServer.lookup(server_ip[server_name])
     status = server.status()
-
+        
     if status:
         logging.error(f"There are still {status.players.online} players online.")
         return status.players.online > 0

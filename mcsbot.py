@@ -13,8 +13,18 @@ from helper import *
 
 load_dotenv()
 
-logger = logging.getLogger(__name__)
-logging.basicConfig(filename="MCM.log", level=logging.INFO)
+logger = logging.getLogger("MCS_BOT")
+logger.setLevel(logging.INFO)
+
+file_handler = logging.FileHandler("MCM.log")
+file_handler.setLevel(logging.INFO)
+
+# logging.basicConfig(filename="MCMlog", level=logging.INFO)
+formatter = logging.Formatter("%(levelname)s: %(name)s: %(message)s")
+
+file_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -28,6 +38,7 @@ allowed_channels = {"minecraft": "Vanilla", "atm9": "ATM9"}
 
 
 url = "https://admin.tntcraft.xyz/api"
+
 
 @client.event
 async def on_ready() -> None:
@@ -140,11 +151,15 @@ async def stop(ctx):
                 await ctx.send(message)
                 raise Exception(message)
         except Exception as e:
-            await ctx.send("the serevr is alreigty down you iiot. shoo. turn around 180 degrees, and walk straight for me pls tq :3")
+            await ctx.send(
+                "the serevr is alreigty down you iiot. shoo. turn around 180 degrees, and walk straight for me pls tq :3"
+            )
             raise Exception("server down")
 
         if response.status_code != 200:
-            if "The remote node is unavailable!" in response.json()["data"]: # should not happen
+            if (
+                "The remote node is unavailable!" in response.json()["data"]
+            ):  # should not happen
                 await ctx.send(
                     "the machine is of idiot, can u not spam or misuse the command pls."
                 )
@@ -173,64 +188,61 @@ async def stop(ctx):
         logging.error(e)
         await ctx.send(f"Stop process has failed.")
 
+
 @client.command(name="wol")
 async def wol(ctx):
     global allowed_users
 
     if ctx.author.id not in allowed_users:
         now = datetime.now()
-        if now.weekday() not in (5, 6):  
+        logging.info(now.weekday())
+        if now.weekday() not in (5, 6):
             current_time = now.time()
-            if current_time < datetime.strptime("19:00", "%H:%M").time() or current_time > datetime.strptime("21:00", "%H:%M").time():
+            if (
+                current_time < datetime.strptime("19:00", "%H:%M").time()
+                or current_time > datetime.strptime("21:00", "%H:%M").time()
+            ):
                 await ctx.send("Sorry you cannot use this command at this time")
-                logging.info(f"{ctx.author.name} tried to use the command at {get_now()} and was denied")
+                logger.info(
+                    f"{ctx.author.name} tried to use the command at {get_now()} and was denied"
+                )
                 return
 
-    logging.info(f"Using wol at {get_now()}")
+    logger.info(f"Using wol at {get_now()}")
     await ctx.send("Starting up server")
     daemon = "daemon1"
-    logging.info("swapping to D: in powershell")
+    logger.info("swapping to D: in powershell")
     await send_cmd(daemon, "powershell")
     await send_cmd(daemon, "cd D:")
-    logging.info("Sending wol command")
+    logger.info("Sending wol command")
     response = await send_cmd("daemon1", "./wol2.ps1")
     if response.status_code == 200:
         await ping_server("kkyhserver2")
 
     else:
-        logging.error(response)
-        ctx.send("There was and error. Contact <@304976615723499533> or <@476162085827379231> ")
-    logging.info(f"Server 2 was turned on at {get_now()}")
+        logger.error(response)
+        ctx.send(
+            "There was and error. Contact <@304976615723499533> or <@476162085827379231> "
+        )
+    logger.info(f"Server 2 was turned on at {get_now()}")
     await ctx.send("Computer has been turned on!")
 
-    
+
 async def send_cmd(daemon, command):
     params = {
-            "apikey": os.getenv("api_key"),
-            "uuid": os.getenv(f"{daemon}_instance_id"),
-            "daemonId": os.getenv(f"{daemon}_id"),
-            "command": command,
-        }
+        "apikey": os.getenv("api_key"),
+        "uuid": os.getenv(f"{daemon}_instance_id"),
+        "daemonId": os.getenv(f"{daemon}_id"),
+        "command": command,
+    }
     async with httpx.AsyncClient() as client:
-        response = await client.get(url=url + "/protected_instance/command", params = params)
-    return response
-
-async def ping_server(server):
-    response = 1
-    while response != 0:
-        process = await asyncio.create_subprocess_exec(
-            "ping", "-c", "1", server,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE
+        response = await client.get(
+            url=url + "/protected_instance/command", params=params
         )
-        
-        await process.wait()
-        logging.info(response)
-        response = process.returncode
-    return True
+    return response
 
 
 if __name__ == "__main__":
     print("starting bot")
-    logging.info(f"{get_now}  Starting Bot...")
+    logger.info(f"{get_now}  Starting Bot...")
     client.run(os.getenv("discord_token"))

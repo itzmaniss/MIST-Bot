@@ -19,7 +19,7 @@ logger.setLevel(logging.INFO)
 file_handler = logging.FileHandler("MCM.log")
 file_handler.setLevel(logging.INFO)
 
-# logging.basicConfig(filename="MCMlog", level=logging.INFO)
+
 formatter = logging.Formatter("%(levelname)s: %(name)s: %(message)s")
 
 file_handler.setFormatter(formatter)
@@ -47,8 +47,8 @@ async def on_ready() -> None:
 
 @client.command(name="test")
 async def test(ctx) -> None:
-    logging.info(ctx)
-    logging.info(ctx.author.id)
+    logger.info(ctx)
+    logger.info(ctx.author.id)
 
 
 @client.command(name="start")
@@ -58,23 +58,23 @@ async def start(ctx) -> None:
     global url
     global allowed_channels
 
-    logging.info(
+    logger.info(
         f"{ctx.author} has used to start command at {get_now()} for {allowed_channels[ctx.channel.name]}"
     )
 
     if ctx.channel.name not in allowed_channels:
-        logging.error(f"Wrong Channel. {ctx.channel.name} was used instead.")
+        logger.error(f"Wrong Channel. {ctx.channel.name} was used instead.")
         await ctx.send(f"Please use the correct channel: {allowed_channels}")
         raise Exception("Incorrect Channel")
 
     if ctx.author.id not in allowed_users:
         if (datetime.now() - last_start) <= timedelta(minutes=59):
             error_message = f"It has only been {format_timedelta(datetime.now() - last_start)} since the server was last started by as user please try again at {(last_start + timedelta(hours=1)).strftime('%Y-%m-%d %H:%M')}"
-            logging.error(error_message)
+            logger.error(error_message)
             await ctx.send(error_message)
             raise Exception("Spamming Start!")
 
-    logging.info("starting server " + allowed_channels[ctx.channel.name])
+    logger.info("starting server " + allowed_channels[ctx.channel.name])
 
     try:
         params = {
@@ -82,10 +82,12 @@ async def start(ctx) -> None:
             "uuid": os.getenv(f"instance_id_{ctx.channel.name}"),
             "daemonId": os.getenv(f"daemon_id_{ctx.channel.name}"),
         }
+        logger.info(f'getting {url + "/protected_instance/stop" + str(params)}')
         async with httpx.AsyncClient() as client:
             response = await client.get(
                 url=url + "/protected_instance/open", params=params
             )
+        logger.info(f'getting{url + "/protected_instance/open" + str(params)}')
         if response.status_code == 500:
             if (
                 response.json()["data"]
@@ -106,33 +108,33 @@ async def start(ctx) -> None:
         message = (
             allowed_channels[ctx.channel.name] + f" has been started at {get_now()}"
         )
-        logging.info(message)
+        logger.info(message)
         await ctx.send(message)
         if ctx.author.id not in allowed_users:
             last_start = datetime.now()
 
     except Exception as e:
-        logging.error(e)
+        logger.error(e)
         await ctx.send(f"Start process has failed.")
 
 
 @client.command(name="stop")
-async def stop(ctx):
+async def stop(ctx) -> None:
     global allowed_users
     global allowed_channels
 
     if ctx.channel.name not in allowed_channels:
-        logging.error(f"Wrong Channel. {ctx.channel.name} was used instead.")
+        logger.error(f"Wrong Channel. {ctx.channel.name} was used instead.")
         await ctx.send(f"Please use the correct channel " + str(allowed_channels))
         raise Exception("Incorrect Channel")
 
     if ctx.channel.name == "minecraft" and ctx.author.id not in allowed_users:
         error_message = f"You are not authorised to use this command."
         await ctx.send(error_message)
-        logging.error(f"Unathorised use of stop command!: {ctx.author}")
+        logger.error(f"Unathorised use of stop command!: {ctx.author}")
         raise Exception("Unauthorised Stop!")
 
-    logging.info("stopping " + allowed_channels[ctx.channel.name])
+    logger.info("stopping " + allowed_channels[ctx.channel.name])
 
     try:
         params = {
@@ -151,12 +153,14 @@ async def stop(ctx):
                 await ctx.send(message)
                 raise Exception(message)
         except Exception as e:
+            logger.error(e)
             await ctx.send(
                 "the serevr is alreigty down you iiot. shoo. turn around 180 degrees, and walk straight for me pls tq :3"
             )
             raise Exception("server down")
-
+          
         if response.status_code != 200:
+            logger.error(f"code {response.status_code}, data: {response.json()["data"]}")
             if (
                 "The remote node is unavailable!" in response.json()["data"]
             ):  # should not happen
@@ -181,23 +185,25 @@ async def stop(ctx):
         message = (
             allowed_channels[ctx.channel.name] + f" has been stopped at {get_now()}"
         )
-        logging.info(message)
+        logger.info(message)
         await ctx.send(message)
 
     except Exception as e:
-        logging.error(e)
+        logger.error(e)
         await ctx.send(f"Stop process has failed.")
 
-
+#wakes up PC 2
 @client.command(name="wol")
 async def wol(ctx):
     global allowed_users
-
+    
+    #check if admin Using
     if ctx.author.id not in allowed_users:
         now = datetime.now()
-        logging.info(now.weekday())
+        #check if it is the weekend
         if now.weekday() not in (5, 6):
             current_time = now.time()
+            #check if its between 7 and 9pm on a weekday
             if (
                 current_time < datetime.strptime("19:00", "%H:%M").time()
                 or current_time > datetime.strptime("21:00", "%H:%M").time()
@@ -207,7 +213,23 @@ async def wol(ctx):
                     f"{ctx.author.name} tried to use the command at {get_now()} and was denied"
                 )
                 return
+    #check if daemon1 terminal is on first!
+ 
+    try:
+        params = {
+            "apikey": os.getenv("api_key"),
+            "uuid": os.getenv(f"instance_id_daemon1_instance_id"),
+            "daemonId": os.getenv(f"daemon1_id"),
+        }
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                url=url + "/protected_instance/open", params=params
+            )
+ 
+    except Exception as e:
+        logger.error(e)
 
+    #send the required commands to wake on lan server 2
     logger.info(f"Using wol at {get_now()}")
     await ctx.send("Starting up server")
     daemon = "daemon1"
@@ -216,6 +238,8 @@ async def wol(ctx):
     await send_cmd(daemon, "cd D:")
     logger.info("Sending wol command")
     response = await send_cmd("daemon1", "./wol2.ps1")
+
+    #check and alert when the pc is actually on
     if response.status_code == 200:
         await ping_server("kkyhserver2")
 
@@ -228,6 +252,7 @@ async def wol(ctx):
     await ctx.send("Computer has been turned on!")
 
 
+#uses api to send a command to the specified daemon
 async def send_cmd(daemon, command):
     params = {
         "apikey": os.getenv("api_key"),

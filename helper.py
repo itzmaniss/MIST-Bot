@@ -31,7 +31,7 @@ def get_now() -> str:
 
 
 def players_online(server_name: str) -> bool:
-    server_ip = {"ATM9": "brainrot.tntcraft.xyz", "Vanilla": "mc.tntcraft.xyz:25573"}
+    server_ip = {"ATM9": "192.168.10.132:25566", "Vanilla": "192.168.10.132:25573"}
 
     server = JavaServer.lookup(server_ip[server_name])
     status = server.status()

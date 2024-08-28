@@ -2,6 +2,8 @@
 MCM.log
 MCMDB.zip
 mcsmanager.py
+*.log
+
 
 __pycache__/
 venv/

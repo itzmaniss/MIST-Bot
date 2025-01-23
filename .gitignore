@@ -1,8 +1,9 @@
-.env
 MCM.log
 MCMDB.zip
 mcsmanager.py
 *.log
+.*
+!.env.example
 
 
 __pycache__/

@@ -21,14 +21,16 @@ class MinecraftFeature(BotFeature):
 
     def setup_commands(self):
         @self.bot.command(name="start")
-        async def start(ctx):
-            await self.handle_start_command(ctx)
+        async def start(ctx, arg):
+            arg = arg.lower()
+            await self.handle_start_command(ctx, arg)
 
         @self.bot.command(name="stop")
-        async def stop(ctx) -> None:
-            await self.handle_stop_command(ctx)
+        async def stop(ctx, arg) -> None:
+            arg = arg.lower()
+            await self.handle_stop_command(ctx, arg)
     
-    async def handle_start_command(self, ctx):
+    async def handle_start_command(self, ctx, arg):
 
         logger.info(
             f"{ctx.author} has used to start command at {get_timestamp()} for {Config.ALLOWED_CHANNELS[ctx.channel.name]}"
@@ -50,7 +52,7 @@ class MinecraftFeature(BotFeature):
 
         try:
  
-            response = await self.server.start_server(Config.UUID[ctx.channel.name], Config.DAEMON_ID[ctx.channel.name])
+            response = await self.server.start_server(Config.UUID[arg], Config.DAEMON_ID[arg])
 
             if response.status_code == 500:
                 if (
@@ -83,7 +85,7 @@ class MinecraftFeature(BotFeature):
 
 
 
-    async def handle_stop_command(self, ctx) -> None:
+    async def handle_stop_command(self, ctx, arg) -> None:
 
         if ctx.channel.name not in Config.ALLOWED_CHANNELS:
             logger.error(f"Wrong Channel. {ctx.channel.name} was used instead.")
@@ -101,7 +103,7 @@ class MinecraftFeature(BotFeature):
 
         try:
             if not players_online(Config.ALLOWED_CHANNELS[ctx.channel.name]):
-                response = await self.server.stop_server(Config.UUID[ctx.channel.name], Config.DAEMON_ID[ctx.channel.name])
+                response = await self.server.stop_server(Config.UUID[arg], Config.DAEMON_ID[arg])
 
             else:
                 message = "Unable to stop. There are players online."

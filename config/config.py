@@ -31,8 +31,8 @@ class Config:
     COMMAND_COOLDOWN = 3  # 3 seconds
 
     #instance details
-    UUID = {"minecraft": os.getenv("instance_id_vanilla"),
+    UUID = {"vanilla": os.getenv("instance_id_vanilla"),
             "ATM9": os.getenv("instance_id_ATM9")}
     
-    DAEMON_ID = {"minecraft": os.getenv("daemon_id_vanilla"),
+    DAEMON_ID = {"vanilla": os.getenv("daemon_id_vanilla"),
             "ATM9": os.getenv("daemon_id_ATM9")}

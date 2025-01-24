@@ -30,7 +30,7 @@ class MinecraftFeature(BotFeature):
     async def handle_start_command(self, ctx, arg):
 
         logger.info(
-            f"{ctx.author} has used to start command at {get_timestamp()} for {Config.ALLOWED_CHANNELS[ctx.channel.name]}"
+            f"{ctx.author} has used to start command at {get_timestamp()} for {arg}"
         )
 
         if ctx.channel.name not in Config.ALLOWED_CHANNELS:
@@ -45,7 +45,7 @@ class MinecraftFeature(BotFeature):
                 await ctx.send(error_message)
                 raise Exception("Spamming Start!")
 
-        logger.info("starting server " + Config.ALLOWED_CHANNELS[ctx.channel.name])
+        logger.info("starting server " + arg)
 
         try:
  
@@ -69,7 +69,7 @@ class MinecraftFeature(BotFeature):
                 raise Exception("Machine is turned off")
 
             message = (
-                Config.ALLOWED_CHANNELS[ctx.channel.name] + f" has been started at {get_timestamp()}"
+                arg + f" has been started at {get_timestamp()}"
             )
             logger.info(message)
             await ctx.send(message)
@@ -95,11 +95,11 @@ class MinecraftFeature(BotFeature):
             logger.error(f"Unathorised use of stop command!: {ctx.author}")
             raise Exception("Unauthorised Stop!")
 
-        logger.info("stopping " + Config.ALLOWED_CHANNELS[ctx.channel.name])
+        logger.info("stopping " + arg)
 
 
         try:
-            if not players_online(Config.ALLOWED_CHANNELS[ctx.channel.name]):
+            if not players_online(arg):
                 response = await self.server.stop_server(Config.UUID[arg], Config.DAEMON_ID[arg])
 
             else:
@@ -140,7 +140,7 @@ class MinecraftFeature(BotFeature):
                 raise Exception("IDK WHATS WRONG ALSO!!!")
 
         message = (
-            Config.ALLOWED_CHANNELS[ctx.channel.name] + f" has been stopped at {get_timestamp()}"
+            arg + f" has been stopped at {get_timestamp()}"
         )
         logger.info(message)
         await ctx.send(message)

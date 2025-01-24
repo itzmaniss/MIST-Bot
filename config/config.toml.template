@@ -1,0 +1,22 @@
+[instance.uuid]
+vanilla = ""
+ATM9 = ""
+daemon1 = ""
+
+[instance.daemon_id]
+vanilla = ""
+ATM9 = ""
+daemon1 = ""
+
+[instance.api]
+key = ""
+url = ""
+
+[discord]
+token = ""
+allowed_users = []
+allowed_channels = []
+music_channel_id = ""
+max_song_duration = 300
+start_cooldown = 3600
+command_cooldown = 3

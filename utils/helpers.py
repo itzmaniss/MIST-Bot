@@ -22,14 +22,14 @@ def is_url(text: str) -> bool:
     return text.startswith(('http://', 'https://'))
 
 def players_online(server_name: str) -> bool:
-    # server_ip = {"ATM9": "192.168.10.132:25566", "Vanilla": "192.168.10.132:25573"}
+    server_ip = {"ATM9": "192.168.10.132:25566", "Vanilla": "192.168.10.132:25573"}
 
-    # server = JavaServer.lookup(server_ip[server_name])
-    # status = server.status()
+    server = JavaServer.lookup(server_ip[server_name])
+    status = server.status()
         
-    # if status:
-    #     Logger.error(f"There are still {status.players.online} players online.")
-    #     return status.players.online > 0
+    if status:
+        Logger.error(f"There are still {status.players.online} players online.")
+        return status.players.online > 0
 
     return False
 

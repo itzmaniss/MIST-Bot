@@ -3,10 +3,7 @@ from config.config import Config
 from utils.helpers import get_timestamp, players_online, format_timedelta
 from utils.logger import Logger
 from core. server_manager import ServerManager
-from datetime import datetime, timedelta
-import asyncio
-import httpx
-import os
+from datetime import timedelta, datetime
 
 logger = Logger("minecraft_bot")
 
@@ -42,8 +39,8 @@ class MinecraftFeature(BotFeature):
             raise Exception("Incorrect Channel")
 
         if ctx.author.id not in Config.ALLOWED_USERS:
-            if (datetime.now() - self.last_start) <= timedelta(minutes=59):
-                error_message = f"It has only been {format_timedelta(datetime.now() - self.last_start)} since the server was last started by as user please try again at {(self.last_start + timedelta(hours=1)).strftime('%Y-%m-%d %H:%M')}"
+            if (get_timestamp() - self.last_start) <= timedelta(minutes=59):
+                error_message = f"It has only been {format_timedelta(get_timestamp() - self.last_start)} since the server was last started by as user please try again at {(self.last_start + timedelta(hours=1)).strftime('%Y-%m-%d %H:%M')}"
                 logger.error(error_message)
                 await ctx.send(error_message)
                 raise Exception("Spamming Start!")
@@ -77,7 +74,7 @@ class MinecraftFeature(BotFeature):
             logger.info(message)
             await ctx.send(message)
             if ctx.author.id not in Config.ALLOWED_USERS:
-                self.last_start = datetime.now()
+                self.last_start = get_timestamp()
 
         except Exception as e:
             logger.error(e)

@@ -40,4 +40,6 @@ class Config:
 
     SMOKER_ID = _config["smoker"]["id"]
 
+    SMOKER_CHANNELS = _config["smoker"]["channels"]
+
     WORD_1 = _config["word"]["1"]

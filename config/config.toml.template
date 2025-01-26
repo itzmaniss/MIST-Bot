@@ -25,6 +25,7 @@ command_cooldown = 3
 
 [smoker]
 id = 1
+channels = []
 
 [word]
 1 = ""

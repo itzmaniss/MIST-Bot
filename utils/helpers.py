@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Union
 from mcstatus import JavaServer
 from utils.logger import Logger
-import discord
+from config.config import Config
 
 def get_timestamp() -> str:
     """Get current timestamp in consistent format."""
@@ -22,7 +22,9 @@ def is_url(text: str) -> bool:
     return text.startswith(('http://', 'https://'))
 
 def players_online(server_name: str) -> bool:
-    server_ip = {"ATM9": "192.168.10.132:25566", "Vanilla": "192.168.10.132:25573"}
+    server_ip = Config.SERVER_IP
+    if len(server_ip) == 0:
+        return False
 
     server = JavaServer.lookup(server_ip[server_name])
     status = server.status()

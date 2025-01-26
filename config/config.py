@@ -35,3 +35,9 @@ class Config:
         "vanilla": _config['instance']['daemon_id']['vanilla'],
         "ATM9": _config['instance']['daemon_id']['ATM9']
     }
+
+    SERVER_IP = _config["server_ip"]
+
+    SMOKER_ID = _config["smoker"]["id"]
+
+    WORD_1 = _config["word"]["1"]

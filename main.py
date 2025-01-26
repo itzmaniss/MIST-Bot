@@ -1,7 +1,7 @@
 from core.bot import DiscordBot
 from features.minecraft import MinecraftFeature
 from features.music import MusicFeature
-from config.config import Config
+from features.smoking import SmokingFeature
 from utils.logger import Logger
 
 def main():
@@ -15,6 +15,7 @@ def main():
     # Load features
     MinecraftFeature(bot)
     MusicFeature(bot)
+    SmokingFeature(bot)
     
     # Run bot
     logger.info('Bot initialized, starting...')

@@ -20,3 +20,11 @@ music_channel_id = ""
 max_song_duration = 300
 start_cooldown = 3600
 command_cooldown = 3
+
+[server_ip]
+
+[smoker]
+id = 1
+
+[word]
+1 = ""

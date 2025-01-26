@@ -1,8 +1,8 @@
 from features.base import BotFeature
-import discord
+from utils.logger import Logger
 from config.config import Config
 import yt_dlp
-import logging
+import discord
 
 class MusicFeature(BotFeature):
     def __init__(self, bot):
@@ -12,8 +12,16 @@ class MusicFeature(BotFeature):
             'noplaylist': True,
             'quiet': True
         }
+        self.logger = Logger("Music Bot")
     
     def setup_commands(self):
+        @self.bot.command(name="join")
+        async def join(ctx, channel_name=None):
+            if channel_name == None:
+                
+                await self.handle_join(ctx)
+
+
         @self.bot.command(name="play")
         async def play(ctx, *, query: str):
             await self.handle_play_command(ctx, query)

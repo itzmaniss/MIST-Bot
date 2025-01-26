@@ -62,7 +62,7 @@ class SmokingFeature(BotFeature):
 
 
     
-    async def name(self, ctx, user_id) -> str:
+    async def name(self, ctx, user_id=None) -> str:
         if user_id is None:
             return ctx.author.name
         

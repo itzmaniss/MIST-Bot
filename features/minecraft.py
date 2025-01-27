@@ -2,7 +2,7 @@ from features.base import BotFeature
 from config.config import Config
 from utils.helpers import get_timestamp, players_online, format_timedelta
 from utils.logger import Logger
-from core. server_manager import ServerManager
+from core.server_manager import ServerManager
 from datetime import timedelta, datetime
 
 logger = Logger("minecraft_bot")
@@ -15,7 +15,6 @@ class MinecraftFeature(BotFeature):
         self.last_start = datetime.now() - timedelta(hours=1)
         self.server = ServerManager(Config.API_URL, Config.API_KEY)
 
-
     def setup_commands(self):
         @self.bot.command(name="start")
         async def start(ctx, arg):
@@ -26,7 +25,7 @@ class MinecraftFeature(BotFeature):
         async def stop(ctx, arg) -> None:
             arg = arg.lower()
             await self.handle_stop_command(ctx, arg)
-    
+
     async def handle_start_command(self, ctx, arg):
 
         logger.info(
@@ -48,8 +47,10 @@ class MinecraftFeature(BotFeature):
         logger.info("starting server " + arg)
 
         try:
- 
-            response = await self.server.start_server(Config.UUID[arg], Config.DAEMON_ID[arg])
+
+            response = await self.server.start_server(
+                Config.UUID[arg], Config.DAEMON_ID[arg]
+            )
 
             if response.status_code == 500:
                 if (
@@ -68,9 +69,7 @@ class MinecraftFeature(BotFeature):
             elif response.status_code != 200:
                 raise Exception("Machine is turned off")
 
-            message = (
-                arg + f" has been started at {get_timestamp()}"
-            )
+            message = arg + f" has been started at {get_timestamp()}"
             logger.info(message)
             await ctx.send(message)
             if ctx.author.id not in Config.ALLOWED_USERS:
@@ -80,16 +79,19 @@ class MinecraftFeature(BotFeature):
             logger.error(e)
             await ctx.send(f"Start process has failed.")
 
-
-
     async def handle_stop_command(self, ctx, arg) -> None:
 
         if ctx.channel.name not in Config.ALLOWED_CHANNELS:
             logger.error(f"Wrong Channel. {ctx.channel.name} was used instead.")
-            await ctx.send(f"Please use the correct channel " + str(Config.ALLOWED_CHANNELS))
+            await ctx.send(
+                f"Please use the correct channel " + str(Config.ALLOWED_CHANNELS)
+            )
             raise Exception("Incorrect Channel")
 
-        if ctx.channel.name == "minecraft" and ctx.author.id not in Config.ALLOWED_USERS:
+        if (
+            ctx.channel.name == "minecraft"
+            and ctx.author.id not in Config.ALLOWED_USERS
+        ):
             error_message = f"You are not authorised to use this command."
             await ctx.send(error_message)
             logger.error(f"Unathorised use of stop command!: {ctx.author}")
@@ -97,23 +99,24 @@ class MinecraftFeature(BotFeature):
 
         logger.info("stopping " + arg)
 
-
         try:
             if not players_online(arg):
-                response = await self.server.stop_server(Config.UUID[arg], Config.DAEMON_ID[arg])
+                response = await self.server.stop_server(
+                    Config.UUID[arg], Config.DAEMON_ID[arg]
+                )
 
             else:
                 message = "Unable to stop. There are players online."
                 await ctx.send(message)
                 raise Exception(message)
-            
+
         except Exception as e:
             logger.error(e)
             await ctx.send(
                 "the serevr is alreigty down you iiot. shoo. turn around 180 degrees, and walk straight for me pls tq :3"
             )
             raise Exception("server down")
-        
+
         logger.info(response)
         if response.status_code != 200:
             data = response.json()["data"]
@@ -139,8 +142,6 @@ class MinecraftFeature(BotFeature):
                 )
                 raise Exception("IDK WHATS WRONG ALSO!!!")
 
-        message = (
-            arg + f" has been stopped at {get_timestamp()}"
-        )
+        message = arg + f" has been stopped at {get_timestamp()}"
         logger.info(message)
         await ctx.send(message)

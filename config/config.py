@@ -7,7 +7,7 @@ class Config:
     _config = toml.load(pathlib.Path("./config/config.toml"))
 
     # Bot Configuration
-    COMMAND_PREFIX = "%"
+    COMMAND_PREFIX = "/"
 
     # API Configuration
     API_URL = _config["instance"]["api"]["url"]

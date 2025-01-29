@@ -1,43 +1,116 @@
 # Discord Bot
 
-A modular Discord bot with Minecraft server management and music playback capabilities.
+This is a multi-purpose Discord bot built with Python and the discord.py library. It includes several features such as server management for Minecraft servers, music playback, and a smoking feature. 
 
-## Setup
+## Table of Contents
+- [Features](#features)
+- [Installation](#installation)
+  - [Prerequisites](#prerequisites)
+  - [Setup](#setup)
+- [Configuration](#configuration)
+- [Usage](#usage)
+  - [Minecraft Server Management](#minecraft-server-management)
+  - [Music Playback](#music-playback) 
+  - [Smoking Feature](#smoking-feature)
+- [File Structure](#file-structure)
+- [Contributing](#contributing)
+- [License](#license)
 
-1. Create and activate virtual environment:
-```bash
-python3 -m venv venv
-source venv/bin/activate
-```
+## Features
 
-2. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
+- **Minecraft Server Management**: Start and stop Minecraft servers using the API of a server management panel. Includes safeguards to prevent abuse and ensure only authorized users can manage the servers.
 
-3. Copy .env.example to .env and fill in your credentials:
-```bash
-cp .env.example .env
-```
+- **Music Playback**: Play music in a voice channel using YouTube as the source. Supports queuing songs, skipping tracks, pausing/resuming, looping, and more. Also fetches lyrics for the currently playing song.
 
-4. Run the bot:
-```bash
-python main.py
-```
+- **Smoking Feature**: A fun feature that allows users with a specific role to "wake up" other users by pinging them repeatedly. Includes checks to ensure it's used in the appropriate channels and by authorized users.
 
-## Project Structure
+## Installation
 
-```
-discord_bot/
-├── config/         # Configuration settings
-├── core/           # Core bot functionality
-├── features/       # Bot features/commands
-└── utils/          # Utility functions
-```
+### Prerequisites 
 
-## Adding New Features
+- Python 3.7+
+- discord.py 
+- yt-dlp
+- aiohttp
+- toml
+- ffmpeg
+- opus
 
-1. Create a new file in the features directory
-2. Create a class that inherits from BotFeature
-3. Implement the setup_commands method
-4. Import and initialize your feature in main.py
+### Setup
+
+1. Clone the repository:
+   ```
+   git clone https://github.com/yourusername/discord-bot.git
+   ```
+
+2. Install the required dependencies:
+   ```
+   pip install -r requirements.txt
+   ```
+
+3. Make sure FFMpeg, yt-dlp and opus are installed
+
+4. Set up the necessary configuration files (see [Configuration](#configuration)).
+
+5. Run the bot:
+   ```
+   python main.py
+   ```
+
+## Configuration
+
+The bot's configuration is stored in a `config.toml` file. An example configuration file is provided in `config/config.toml`. You'll need to edit this file to include your bot token, server management API details, allowed users and channels, and more.
+
+## Usage
+
+### Minecraft Server Management
+
+- `/start <server>`: Start a Minecraft server. Replace `<server>` with the name of the server (e.g., "vanilla", "ATM9").
+- `/stop <server>`: Stop a Minecraft server.
+
+### Music Playback
+
+- `/join`: Join a voice channel.The bot will join the channel the user is currently in.
+- `/play <query>`: Play a song from YouTube. `<query>` can be a search term or a YouTube URL.
+- `/pause` or `/resume`: Pause or resume playback.
+- `/skip`: Skip the currently playing song. 
+- `/queue` or `/q`: Show the current song queue.
+- `/clear`: Clear the song queue.
+- `/remove <position>`: Remove a song from the queue at the specified position.
+- `/volume <volume>` or `/vol <volume>`: Set the volume to a value between 0 and 100.
+- `/loop`: Toggle loop mode on or off.
+- `/np`, `/now`, or `/playing`: Show the currently playing song.
+- `/seek <timestamp>`: Seek to a specific position in the current song. `<timestamp>` can be in the format "MM:SS" or a number of seconds.
+- `/replay` or `/restart`: Replay the current song from the beginning.
+- `/lyrics [song]` or `/ly [song]`: Fetch the lyrics for the specified song. If no song is specified, the lyrics for the currently playing song will be fetched.
+
+### Smoking Feature
+
+- `/wakey <user>`: "Wake up" a user by pinging them repeatedly. Only available to users with the "smoker" role and usable in designated channels.
+- `/woken`: Stop the pinging for a user.The pinging for the user who used the command will be stopped.
+
+## File Structure
+
+- `main.py`: The main entry point of the bot.
+- `config/`: Contains configuration files.
+  - `config.py`: Loads the configuration from `config.toml` and provides it to the rest of the application.
+  - `config.toml`: The main configuration file. 
+- `core/`: Contains core functionality of the bot.
+  - `bot.py`: Defines the main `DiscordBot` class.
+  - `server_manager.py`: Handles interactions with the Minecraft server management API.
+- `features/`: Contains the different features of the bot.
+  - `base.py`: Defines a base `BotFeature` class that all features inherit from.
+  - `minecraft.py`: Implements the Minecraft server management feature.
+  - `music.py`: Implements the music playback feature.
+  - `smoking.py`: Implements the smoking feature.
+- `utils/`: Contains utility functions and classes. 
+  - `helpers.py`: Various helper functions used throughout the bot.
+  - `logger.py`: A simple logging utility.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is open source and available under the [MIT License](LICENSE).

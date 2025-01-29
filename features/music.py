@@ -19,7 +19,12 @@ class MusicFeature(BotFeature):
             'format': 'bestaudio/best',
             'noplaylist': True,
             'quiet': True,
-            'extract_flat': True
+            'extract_flat': False,  # Changed to False to get full extraction
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'wav',
+                'preferredquality': '320',
+            }]
         }
         self.ffmpeg_opts = {
             'options': '-vn -b:a 192k',
@@ -28,7 +33,7 @@ class MusicFeature(BotFeature):
         self.config = Config()
         self.logger = Logger("Music Bot")
 
-        # Player state
+        # Player state//
         self.queue = queue.Queue()
         self.channel = None
         self.current_player = None
@@ -57,7 +62,7 @@ class MusicFeature(BotFeature):
         async def play(ctx, *, query: str):
             await self.handle_play_command(ctx, query)
 
-        @self.bot.command(name="pause")
+        @self.bot.command(name="pause", aliases = ["resume"])
         async def pause(ctx):
             await self.handle_pause_command(ctx)
 
@@ -107,15 +112,15 @@ class MusicFeature(BotFeature):
     
     def search_music(self, query):
         try:
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                info_dict = ydl.extract_info(query, download=False)
-                audio_url = info_dict['url']
-
-            return True
+            with yt_dlp.YoutubeDL(self.ydl_opts) as ydl:
+                info = ydl.extract_info(f"ytsearch:{query}", download=False)["entries"][0]
+            return {'url': info['url'],
+                    'title': info['title'],
+                    'duration': info["duration"]}
 
         except Exception as e:
             self.logger.error(e)
-            return False
+            return None
 
 
    
@@ -159,9 +164,10 @@ class MusicFeature(BotFeature):
         if not self.in_call(ctx):
             await self.handle_join_command(ctx, None)
             
+        print(query)
         track_info = self.search_music(query)
         if not track_info:
-            await ctx.send("Could not find the song! 😕")
+            await ctx.send("Search a real song leh... 😕")
             return
             
         self.queue.put(track_info)
@@ -181,6 +187,7 @@ class MusicFeature(BotFeature):
             return
             
         self.current_track = self.queue.get()
+        self.logger.info(f"playing {self.current_track['title']}")
         
         voice_client = ctx.guild.voice_client
         if not voice_client:

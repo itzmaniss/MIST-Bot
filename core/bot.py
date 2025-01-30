@@ -10,7 +10,9 @@ class DiscordBot(commands.Bot):
         intents = discord.Intents.default()
         intents.message_content = True
 
-        super().__init__(command_prefix=Config.COMMAND_PREFIX, intents=intents, help_command=None)
+        super().__init__(
+            command_prefix=Config.COMMAND_PREFIX, intents=intents, help_command=None
+        )
 
         self.logger = logging.getLogger("DiscordBot")
         self.startup_time = datetime.now()
@@ -23,7 +25,7 @@ class DiscordBot(commands.Bot):
         self.logger.info(f"Logged in as {self.user.name} (ID: {self.user.id})")
         await self.change_presence(
             activity=discord.Game(name=f"{Config.COMMAND_PREFIX}help for commands"),
-            status=discord.Status.dnd
+            status=discord.Status.dnd,
         )
 
     def run_bot(self):

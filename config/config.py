@@ -46,5 +46,4 @@ class Config:
 
     WORD_1 = _config["word"]["1"]
 
-
     GENIUS_API_TOKEN = _config["genius"]["api"]

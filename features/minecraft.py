@@ -16,12 +16,12 @@ class MinecraftFeature(BotFeature):
         self.server = ServerManager(Config.API_URL, Config.API_KEY)
 
     def setup_commands(self):
-        @self.bot.command(name="start")
+        @self.bot.hybrid_command(name="start", with_app_command=True, description="Start specified server")
         async def start(ctx, arg):
             arg = arg.lower()
             await self.handle_start_command(ctx, arg)
 
-        @self.bot.command(name="stop")
+        @self.bot.hybrid_command(name="stop", with_app_command=True, description="Stop specified server")
         async def stop(ctx, arg) -> None:
             arg = arg.lower()
             await self.handle_stop_command(ctx, arg)

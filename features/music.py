@@ -50,7 +50,7 @@ class MusicFeature(BotFeature):
         self.lyrics_token = self.config.GENIUS_API_TOKEN
 
     def setup_commands(self):
-        @self.bot.command(name="join")
+        @self.bot.hybrid_command(name="join", with_app_command=True, description="Make me join your call")
         async def join(ctx, channel_name=None):
             try:
                 if self.in_call(ctx):
@@ -62,58 +62,58 @@ class MusicFeature(BotFeature):
                 self.logger.error(e)
                 await ctx.send("I dont like you so i throw error byeee")
 
-        @self.bot.command(name="play")
+        @self.bot.hybrid_command(name="play", with_app_command=True, description="Play a song of choice")
         async def play(ctx, *, query: str):
             await self.handle_play_command(ctx, query)
 
-        @self.bot.command(name="pause", aliases = ["resume"])
+        @self.bot.hybrid_command(name="pause", aliases = ["resume"], with_app_command=True, description="Pause or Resume song")
         async def pause(ctx):
             await self.handle_pause_command(ctx)
 
-        @self.bot.command(name="skip")
+        @self.bot.hybrid_command(name="skip", with_app_command=True, description="Skip next song in queue")
         async def skip(ctx):
             if self.in_call(ctx) and self.queue.empty():
                 await ctx.send("Queue is empty bruh... Anyhowz ah you 🎵")
             else:
                 await self.handle_skip_command(ctx)
 
-        @self.bot.command(name="quit")
+        @self.bot.hybrid_command(name="quit", with_app_command=True, description="Stop playing songs")
         async def quit(ctx):
             await self.handle_quit_command(ctx)
 
-        @self.bot.command(name="queue", aliases=["q"])
+        @self.bot.hybrid_command(name="queue", aliases=["q"], with_app_command=True, description="Add song to queue")
         async def show_queue(ctx):
             await self.handle_queue_command(ctx)
 
-        @self.bot.command(name="clear")
+        @self.bot.hybrid_command(name="clear", with_app_command=True, description="Empty song queue")
         async def clear_queue(ctx):
             await self.handle_clear_command(ctx)
 
-        @self.bot.command(name="remove")
+        @self.bot.hybrid_command(name="remove", with_app_command=True, description="Remove song from queue based on specified song queue position")
         async def remove_from_queue(ctx, position: int):
             await self.handle_remove_command(ctx, position)
 
-        @self.bot.command(name="volume", aliases=["vol"])
+        @self.bot.hybrid_command(name="volume", aliases=["vol"], with_app_command=True, description="Adjust volume")
         async def set_volume(ctx, volume: int):
             await self.handle_volume_command(ctx, volume)
 
-        @self.bot.command(name="loop")
+        @self.bot.hybrid_command(name="loop", with_app_command=True, description="Toggles current song loop")
         async def toggle_loop(ctx):
             await self.handle_loop_command(ctx)
 
-        @self.bot.command(name="np", aliases=["now", "playing"])
+        @self.bot.hybrid_command(name="np", aliases=["now", "playing"], with_app_command=True, description="Returns current song")
         async def now_playing(ctx):
             await self.handle_now_playing_command(ctx)
 
-        @self.bot.command(name="seek")
+        @self.bot.hybrid_command(name="seek", with_app_command=True, description="idk wat this does lol")
         async def seek(ctx, timestamp: str):
             await self.handle_seek_command(ctx, timestamp)
 
-        @self.bot.command(name="replay", aliases=["restart"])
+        @self.bot.hybrid_command(name="replay", aliases=["restart"], with_app_command=True, description="Restart queue/song????????")
         async def replay(ctx):
             await self.handle_replay_command(ctx)
 
-        @self.bot.command(name="lyrics", aliases=["ly"])
+        @self.bot.hybrid_command(name="lyrics", aliases=["ly"], with_app_command=True, description="who cares abt this")
         async def lyrics(ctx, *, song_name: str = None):
             await self.handle_lyrics_command(ctx, song_name)
     

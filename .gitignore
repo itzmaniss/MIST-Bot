@@ -5,6 +5,7 @@ mcsmanager.py
 .*
 !.env.example
 config.toml
+music_cache.json
 
 __pycache__/
 venv/

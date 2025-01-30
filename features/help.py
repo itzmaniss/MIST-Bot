@@ -11,9 +11,12 @@ class HelpFeature(BotFeature):
         self.config = Config
 
     def setup_commands(self):
-        @self.bot.hybrid_command(name="help", with_app_command=True, description="Shows all commands")
+        @self.bot.hybrid_command(
+            name="help", with_app_command=True, description="Shows all commands"
+        )
         async def help(ctx):
-            await ctx.send("""```
+            await ctx.send(
+                """```
 ### Minecraft Server Management
 
 - `/start <server>`: Start a Minecraft server. Replace `<server>` with the name of the server (e.g., "vanilla", "ATM9").
@@ -39,4 +42,5 @@ class HelpFeature(BotFeature):
 
 - `/wakey <user>`: "Wake up" a user by pinging them repeatedly. Only available to users with the "smoker" role and usable in designated channels.
 - `/woken`: Stop the pinging for a user.The pinging for the user who used the command will be stopped.
-                           ```""")
+                           ```"""
+            )

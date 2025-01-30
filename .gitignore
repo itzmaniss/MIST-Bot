@@ -9,3 +9,6 @@ music_cache.json
 
 __pycache__/
 venv/
+
+utils/config_manager.py
+*.db

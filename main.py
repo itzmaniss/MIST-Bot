@@ -3,6 +3,7 @@ from features.minecraft import MinecraftFeature
 from features.music import MusicFeature
 from features.smoking import SmokingFeature
 from features.help import HelpFeature
+from features.counting import CountingFeature
 from utils.logger import Logger
 
 
@@ -19,6 +20,7 @@ def main():
     MusicFeature(bot)
     SmokingFeature(bot)
     HelpFeature(bot)
+    CountingFeature(bot)
 
     # Run bot
     logger.info("Bot initialized, starting...")

@@ -68,12 +68,12 @@ class CounterUtils:
         'log10': math.log10,
         
         # Trigonometric functions
-        'sin': math.sin,
-        'cos': math.cos,
-        'tan': math.tan,
-        'asin': math.asin,
-        'acos': math.acos,
-        'atan': math.atan,
+        'sin': lambda x: math.sin(math.radians(x)),
+        'cos': lambda x: math.cos(math.radians(x)),
+        'tan': lambda x: math.tan(math.radians(x)),
+        'asin': lambda x: math.degrees(math.asin(x)),
+        'acos': lambda x: math.degrees(math.acos(x)),
+        'atan': lambda x: math.degrees(math.atan(x)),
         'atan2': math.atan2,
         'dist': math.dist,
         'hypot': math.hypot,
@@ -81,13 +81,13 @@ class CounterUtils:
         'radians': math.radians,
         
         # Hyperbolic functions
-        'sinh': math.sinh,
-        'cosh': math.cosh,
-        'tanh': math.tanh,
-        'asinh': math.asinh,
-        'acosh': math.acosh,
-        'atanh': math.atanh,
-        
+        'sinh': lambda x: math.sinh(math.radians(x)),
+        'cosh': lambda x: math.cosh(math.radians(x)),
+        'tanh': lambda x: math.tanh(math.radians(x)),
+        'asinh': lambda x: math.degrees(math.asinh(x)),
+        'acosh': lambda x: math.degrees(math.acosh(x)),
+        'atanh': lambda x: math.degrees(math.atanh(x)),
+
         # Special functions
         'erf': math.erf,
         'erfc': math.erfc,
@@ -95,12 +95,12 @@ class CounterUtils:
         'lgamma': math.lgamma,
 
         # NumPy trigonometric functions
-        'numpysin': numpy.sin,
-        'numpycos': numpy.cos,
-        'numpytan': numpy.tan,
-        'numpyarcsin': numpy.arcsin,
-        'numpyarccos': numpy.arccos,
-        'numpyarctan': numpy.arctan,
+        'numpysin':lambda x: numpy.sin(math.radians(x)),
+        'numpycos': lambda x: numpy.cos(math.radians(x)),
+        'numpytan': lambda x: numpy.tan(math.radians(x)),
+        'numpyarcsin': lambda x: math.degrees(numpy.arcsin(x)),
+        'numpyarccos': lambda x: math.degrees(numpy.arccos(x)),
+        'numpyarctan': lambda x: math.degrees(numpy.arctan(x)),
         'numpyhypot': numpy.hypot,
         'numpyarctan2': numpy.arctan2,
         'numpydegrees': numpy.degrees,
@@ -110,12 +110,12 @@ class CounterUtils:
         'numpyrad2deg': numpy.rad2deg,
         
         # NumPy hyperbolic functions
-        'numpysinh': numpy.sinh,
-        'numpycosh': numpy.cosh,
-        'numpytanh': numpy.tanh,
-        'numpyarcsinh': numpy.arcsinh,
-        'numpyarccosh': numpy.arccosh,
-        'numpyarctanh': numpy.arctanh,
+        'numpysinh': lambda x: numpy.sin(math.radians(x)),
+        'numpycosh':lambda x: numpy.cos(math.radians(x)),
+        'numpytanh': lambda x: numpy.tan(math.radians(x)),
+        'numpyarcsinh': lambda x: math.degrees(numpy.arcsinh(x)),
+        'numpyarccosh': lambda x: math.degrees(numpy.arccosh(x)),
+        'numpyarctanh': lambda x: math.degrees(numpy.arctanh(x)),
         
         # NumPy rounding functions
         'numpyaround': numpy.around,
@@ -300,11 +300,16 @@ class CounterUtils:
             tree = ast.parse(expression, mode='eval')
             result = self._eval_node(tree.body)
             
-            # Validate result
-            if isinstance(result, (int, float)) and float(result).is_integer():
-                result_int = int(result)
-                if len(str(abs(result_int))) <= self.max_digits:
-                    return result_int
+            # Enhanced validation for trigonometric and other float results
+            if isinstance(result, (int, float)):
+                # If result is a float, round it if it's very close to an integer
+                if abs(result - round(result)) < 1e-10:
+                    result_int = round(result)
+                    if len(str(abs(result_int))) <= self.max_digits:
+                        return result_int
+                elif isinstance(result, int):
+                    if len(str(abs(result))) <= self.max_digits:
+                        return result
             return None
             
         except (SyntaxError, ValueError, TypeError, ZeroDivisionError, 

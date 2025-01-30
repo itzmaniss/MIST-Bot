@@ -9,6 +9,7 @@ import asyncio
 import aiohttp
 import re
 from typing import List, Dict
+from discord import app_commands
 
 
 # un-comment for mac
@@ -51,6 +52,7 @@ class MusicFeature(BotFeature):
 
     def setup_commands(self):
         @self.bot.hybrid_command(name="join", with_app_command=True, description="Make me join your call")
+        @app_commands.describe(channel_name="Specify channel name (optional)")
         async def join(ctx, channel_name=None):
             try:
                 if self.in_call(ctx):
@@ -63,6 +65,7 @@ class MusicFeature(BotFeature):
                 await ctx.send("I dont like you so i throw error byeee")
 
         @self.bot.hybrid_command(name="play", with_app_command=True, description="Play a song of choice")
+        @app_commands.describe(query="Enter song to search")
         async def play(ctx, *, query: str):
             await self.handle_play_command(ctx, query)
 
@@ -90,10 +93,12 @@ class MusicFeature(BotFeature):
             await self.handle_clear_command(ctx)
 
         @self.bot.hybrid_command(name="remove", with_app_command=True, description="Remove song from queue based on specified song queue position")
+        @app_commands.describe(position="Queue number")
         async def remove_from_queue(ctx, position: int):
             await self.handle_remove_command(ctx, position)
 
         @self.bot.hybrid_command(name="volume", aliases=["vol"], with_app_command=True, description="Adjust volume")
+        @app_commands.describe(volume="Volume Percentage (Range from 0 to 100. 0 = softest, 100 = loudest)")
         async def set_volume(ctx, volume: int):
             await self.handle_volume_command(ctx, volume)
 
@@ -105,7 +110,8 @@ class MusicFeature(BotFeature):
         async def now_playing(ctx):
             await self.handle_now_playing_command(ctx)
 
-        @self.bot.hybrid_command(name="seek", with_app_command=True, description="idk wat this does lol")
+        @self.bot.hybrid_command(name="seek", with_app_command=True, description="Change timestamp of current track")
+        @app_commands.describe(timestamp="Seconds from start of track")
         async def seek(ctx, timestamp: str):
             await self.handle_seek_command(ctx, timestamp)
 
@@ -113,7 +119,8 @@ class MusicFeature(BotFeature):
         async def replay(ctx):
             await self.handle_replay_command(ctx)
 
-        @self.bot.hybrid_command(name="lyrics", aliases=["ly"], with_app_command=True, description="who cares abt this")
+        @self.bot.hybrid_command(name="lyrics", aliases=["ly"], with_app_command=True, description="Display lyrics in chat")
+        @app_commands.describe(song_name="Enter song name to search for")
         async def lyrics(ctx, *, song_name: str = None):
             await self.handle_lyrics_command(ctx, song_name)
     

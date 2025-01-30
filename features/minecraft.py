@@ -4,6 +4,7 @@ from utils.helpers import get_timestamp, players_online, format_timedelta
 from utils.logger import Logger
 from core.server_manager import ServerManager
 from datetime import timedelta, datetime
+from discord import app_commands
 
 logger = Logger("minecraft_bot")
 
@@ -17,14 +18,24 @@ class MinecraftFeature(BotFeature):
 
     def setup_commands(self):
         @self.bot.hybrid_command(name="start", with_app_command=True, description="Start specified server")
-        async def start(ctx, arg):
-            arg = arg.lower()
-            await self.handle_start_command(ctx, arg)
+        @app_commands.describe(server="Server name")
+        @app_commands.choices(server=[ # Find out how to un-hardcode this
+            app_commands.Choice(name='Vanilla', value='vanilla'),
+            app_commands.Choice(name='ATM9', value='atm9')
+        ])
+        async def start(ctx, server):
+            server = server.lower()
+            await self.handle_start_command(ctx, server)
 
         @self.bot.hybrid_command(name="stop", with_app_command=True, description="Stop specified server")
-        async def stop(ctx, arg) -> None:
-            arg = arg.lower()
-            await self.handle_stop_command(ctx, arg)
+        @app_commands.describe(server="Server name")
+        @app_commands.choices(server=[ # Find out how to un-hardcode this
+            app_commands.Choice(name='Vanilla', value='vanilla'),
+            app_commands.Choice(name='ATM9', value='atm9')
+        ])
+        async def stop(ctx, server) -> None:
+            server = server.lower()
+            await self.handle_stop_command(ctx, server)
 
     async def handle_start_command(self, ctx, arg):
 

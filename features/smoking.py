@@ -3,7 +3,7 @@ from config.config import Config
 from utils.logger import Logger
 import asyncio
 import discord
-
+from discord import app_commands
 
 class SmokingFeature(BotFeature):
     def __init__(self, bot):
@@ -14,6 +14,7 @@ class SmokingFeature(BotFeature):
 
     def setup_commands(self):
         @self.bot.hybrid_command(name="wakey", with_app_command=True, description="YUR FONE LINGINGg!")
+        @app_commands.describe(user="User ID (Alternatively use @ to input the user)")
         async def wakey(ctx, user):
             if not await self.check_valid(ctx):
                 return
@@ -27,6 +28,7 @@ class SmokingFeature(BotFeature):
                 await ctx.send("An error occurred while processing the command.")
 
         @self.bot.hybrid_command(name="woken", with_app_command=True, description="off snooze")
+        @app_commands.describe(user="User ID (Alternatively use @ to input the user)")
         async def woken(ctx, user=None):
             if not await self.check_valid(ctx):
                 return

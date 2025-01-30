@@ -12,7 +12,7 @@ from typing import List, Dict
 
 
 # un-comment for mac
-# discord.opus.load_opus("/opt/homebrew/Cellar/opus/1.5.2/lib/libopus.0.dylib")
+discord.opus.load_opus("/opt/homebrew/Cellar/opus/1.5.2/lib/libopus.0.dylib")
 class MusicFeature(BotFeature):
     def __init__(self, bot):
         super().__init__(bot)
@@ -118,17 +118,17 @@ class MusicFeature(BotFeature):
             await self.handle_lyrics_command(ctx, song_name)
     
     def search_music(self, query):
-        # Check cache first
-        cached_data = self.cache.get(query)
-        if cached_data:
-            return cached_data  # Use cached data if available
+        # # Check cache first
+        # cached_data = self.cache.get(query)
+        # if cached_data:
+        #     return cached_data  # Use cached data if available
 
         # If not in cache, fetch from YouTube
         result = self.fetch_from_youtube(query)
 
-        # Update cache (automatically saves to disk)
-        if result:
-            self.cache.update(query, result)
+        # # Update cache (automatically saves to disk)
+        # if result:
+        #     self.cache.update(query, result)
 
         return result
 

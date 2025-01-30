@@ -7,7 +7,7 @@ class Config:
     _config = toml.load(pathlib.Path("./config/config.toml"))
 
     # Bot Configuration
-    COMMAND_PREFIX = "/"
+    COMMAND_PREFIX = "#"
 
     # API Configuration
     API_URL = _config["instance"]["api"]["url"]
@@ -17,6 +17,7 @@ class Config:
     # Features Configuration
     ALLOWED_USERS = _config["discord"]["allowed_users"]
     ALLOWED_CHANNELS = _config["discord"]["allowed_channels"]
+    COUNTING_CHANNELS = _config["discord"]["counting_channels"]
 
     # Music Configuration
     MUSIC_CHANNEL_ID = _config["discord"]["music_channel_id"]

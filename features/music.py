@@ -497,6 +497,7 @@ class MusicFeature(BotFeature):
 
     async def handle_lyrics_command(self, ctx, song_name: str = None):
         """Fetch and display lyrics."""
+        await ctx.defer()
         if not song_name and not self.current_track:
             await discord_message(ctx, "Either specify a song or play something first!")
             return

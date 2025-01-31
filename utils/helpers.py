@@ -48,6 +48,7 @@ def format_timedelta(delta):
     return f"{hours}h {minutes}m {seconds}s"
 
 async def discord_message(ctx, msg) -> None:
+    print(ctx.message)
     try:
         await ctx.send(msg)
     except Exception as e:

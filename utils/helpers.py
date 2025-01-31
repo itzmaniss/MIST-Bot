@@ -3,6 +3,7 @@ from typing import Union
 from mcstatus import JavaServer
 from utils.logger import Logger
 from config.config import Config
+import discord
 
 
 def get_timestamp() -> str:
@@ -45,3 +46,10 @@ def format_timedelta(delta):
     hours, remainder = divmod(total_seconds, 3600)
     minutes, seconds = divmod(remainder, 60)
     return f"{hours}h {minutes}m {seconds}s"
+
+async def discord_message(ctx, msg) -> None:
+    try:
+        await ctx.send(msg)
+    except Exception as e:
+        # If the interaction is no longer valid, try sending a regular message
+        await ctx.channel.send(msg)

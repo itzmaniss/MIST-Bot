@@ -1,6 +1,7 @@
 from features.base import BotFeature
 from config.config import Config
 from utils.logger import Logger
+from utils.helpers import discord_message
 import asyncio
 import discord
 from discord import app_commands
@@ -28,7 +29,7 @@ class SmokingFeature(BotFeature):
                 await self.handle_wakey(ctx, user)
             except Exception as e:
                 self.logger.error(f"Error in wakey command: {e}")
-                await ctx.send("An error occurred while processing the command.")
+                await discord_message(ctx, "An error occurred while processing the command.")
 
         @self.bot.hybrid_command(
             name="woken", with_app_command=True, description="off snooze"
@@ -42,7 +43,7 @@ class SmokingFeature(BotFeature):
                     await self.handle_woken(ctx, user)
                 except Exception as e:
                     self.logger.error(f"Error in wakey command: {e}")
-                    await ctx.send("An error occurred while processing the command.")
+                    await discord_message(ctx, "An error occurred while processing the command.")
 
         @self.bot.hybrid_command(
             name="test", with_app_command=True, description="useless command"
@@ -62,13 +63,13 @@ class SmokingFeature(BotFeature):
 
     async def check_valid(self, ctx):
         if not self.valid_smoker(ctx):
-            await ctx.send("You are not authorized to use this command.")
+            await discord_message(ctx, "You are not authorized to use this command.")
             self.logger.info(
                 f"a non-smoker {await self.name(ctx)} tried to abuse this command frfr"
             )
             return False
         if not self.valid_channel(ctx):
-            await ctx.send("Bijass use in ashes only")
+            await discord_message(ctx, "Bijass use in ashes only")
             self.logger.info(
                 f"stupid ahh smoker {await self.name(ctx)} tried to abuse this command in wrong channel frfr"
             )
@@ -99,7 +100,7 @@ class SmokingFeature(BotFeature):
             for _ in range(20):
                 if not self.ongoing_pings.get(user, False):
                     break
-                await ctx.send(f"wake up {user}.Time to smoke you {self.config.WORD_1}")
+                await discord_message(ctx, f"wake up {user}.Time to smoke you {self.config.WORD_1}")
                 await asyncio.sleep(1)
         except Exception as e:
             self.logger.error(f"Error in handle_wakey: {e}")
@@ -112,4 +113,4 @@ class SmokingFeature(BotFeature):
         if user in self.ongoing_pings:
             self.ongoing_pings[user] = False
         self.logger.info(f"{await self.name(ctx, user)} has awoken")
-        await ctx.send(f"Thanks for waking up{user}")
+        await discord_message(ctx, f"Thanks for waking up{user}")

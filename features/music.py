@@ -2,6 +2,7 @@ from features.base import BotFeature
 from utils.logger import Logger
 from config.config import Config
 from utils.cache import MusicCache
+from utils.helpers import discord_message
 import queue
 import yt_dlp
 import discord
@@ -65,12 +66,12 @@ class MusicFeature(BotFeature):
                     self.logger.info(
                         f"{ctx.author.name} tried to make me join another channel forcefully."
                     )
-                    await ctx.send("Blind or what? cannot see I in another call ah?")
+                    await discord_message(ctx, "Blind or what? cannot see I in another call ah?")
                     return
                 await self.handle_join_command(ctx, channel_name)
             except Exception as e:
                 self.logger.error(e)
-                await ctx.send("I dont like you so i throw error byeee")
+                await discord_message(ctx, "I dont like you so i throw error byeee")
 
         @self.bot.hybrid_command(
             name="play", with_app_command=True, description="Play a song of choice"
@@ -93,7 +94,7 @@ class MusicFeature(BotFeature):
         )
         async def skip(ctx):
             if self.in_call(ctx) and self.queue.empty():
-                await ctx.send("Queue is empty bruh... Anyhowz ah you 🎵")
+                await discord_message(ctx, "Queue is empty bruh... Anyhowz ah you 🎵")
             else:
                 await self.handle_skip_command(ctx)
 
@@ -224,7 +225,7 @@ class MusicFeature(BotFeature):
         channel = discord.utils.get(ctx.guild.voice_channels, name=channel_name)
         if not channel:
             asyncio.create_task(
-                ctx.send(f"Dont even have: {channel_name}... stop trolling bruh")
+                discord_message(ctx, f"Dont even have: {channel_name}... stop trolling bruh")
             )
             return False
         return True
@@ -235,12 +236,12 @@ class MusicFeature(BotFeature):
             channel = discord.utils.get(ctx.guild.voice_channels, name=channel_name)
         else:
             if not ctx.author.voice:
-                await ctx.send("You need to be in a voice channel lah retard!")
+                await discord_message(ctx, "You need to be in a voice channel lah retard!")
                 return
             channel = ctx.author.voice.channel
 
         if not channel:
-            await ctx.send("You need to be in a voice channel lah retard!")
+            await discord_message(ctx, "You need to be in a voice channel lah retard!")
             return
 
         if ctx.guild.voice_client:
@@ -249,7 +250,7 @@ class MusicFeature(BotFeature):
             await channel.connect()
 
         self.channel = channel
-        await ctx.send(f"I have blessed {channel.name} with my prescence! 🎵")
+        await discord_message(ctx, f"I have blessed {channel.name} with my prescence! 🎵")
 
     async def handle_play_command(self, ctx, query: str):
         """Handle playing a track."""
@@ -258,13 +259,13 @@ class MusicFeature(BotFeature):
 
         track_info = self.search_music(query)
         if not track_info:
-            await ctx.send(
+            await discord_message(ctx, 
                 "Your song search as real as your gf... Search a real song leh... 😕"
             )
             return
 
         self.queue.put(track_info)
-        await ctx.send(f"Added to queue: {track_info['title']} 🎵")
+        await discord_message(ctx, f"Added to queue: {track_info['title']} 🎵")
 
         if not ctx.guild.voice_client.is_playing():
             await self.play_next(ctx)
@@ -276,7 +277,7 @@ class MusicFeature(BotFeature):
 
         if self.queue.empty():
             self.current_track = None
-            await ctx.send("Queus is empty alreadyy, please add more to continues")
+            await discord_message(ctx, "Queus is empty alreadyy, please add more to continues")
             return
 
         self.current_track = self.queue.get()
@@ -297,43 +298,43 @@ class MusicFeature(BotFeature):
             asyncio.run_coroutine_threadsafe(self.play_next(ctx), self.bot.loop)
 
         voice_client.play(audio, after=after_playing)
-        await ctx.send(f"I shall sing: {self.current_track['title']} nowzz 🎵")
+        await discord_message(ctx, f"I shall sing: {self.current_track['title']} nowzz 🎵")
 
     async def handle_pause_command(self, ctx):
         """Handle pausing/resuming playback."""
         if not self.in_call(ctx):
-            await ctx.send("I am not even in a voice channel. STOP DISTURBING MY PEACE")
+            await discord_message(ctx, "I am not even in a voice channel. STOP DISTURBING MY PEACE")
             return
 
         voice_client = ctx.guild.voice_client
         if voice_client.is_playing():
             voice_client.pause()
-            await ctx.send("Paused! ⏸️")
+            await discord_message(ctx, "Paused! ⏸️")
         elif voice_client.is_paused():
             voice_client.resume()
-            await ctx.send("Resumed! ▶️")
+            await discord_message(ctx, "Resumed! ▶️")
         else:
-            await ctx.send(
+            await discord_message(ctx, 
                 "NOTHING IS EVEN BEING PLAYED! Are you stupid {ctx.author.id}?"
             )
 
     async def handle_skip_command(self, ctx):
         """Handle skipping the current track."""
         if not self.in_call(ctx):
-            await ctx.send("I not even in a voice channel bruh!")
+            await discord_message(ctx, "I not even in a voice channel bruh!")
             return
 
         voice_client = ctx.guild.voice_client
         if voice_client.is_playing():
             voice_client.stop()
-            await ctx.send("Skipped! ⏭️")
+            await discord_message(ctx, "Skipped! ⏭️")
         else:
-            await ctx.send("Nothing is playing!")
+            await discord_message(ctx, "Nothing is playing!")
 
     async def handle_quit_command(self, ctx):
         """Handle leaving the voice channel."""
         if not self.in_call(ctx):
-            await ctx.send(
+            await discord_message(ctx, 
                 "Now even in a channel to quit... You want me quit life or waht?"
             )
             return
@@ -345,12 +346,12 @@ class MusicFeature(BotFeature):
         await ctx.guild.voice_client.disconnect()
         self.channel = None
         self.current_track = None
-        await ctx.send("Bye bye! gonna go get more sleepz than all of yall 👋")
+        await discord_message(ctx, "Bye bye! gonna go get more sleepz than all of yall 👋")
 
     async def handle_queue_command(self, ctx):
         """Show the current queue."""
         if self.queue.empty():
-            await ctx.send("Theres nothing left to be played. ADD MORE NOWWW!")
+            await discord_message(ctx, "Theres nothing left to be played. ADD MORE NOWWW!")
             return
 
         queue_list = list(self.queue.queue)
@@ -379,18 +380,18 @@ class MusicFeature(BotFeature):
         if queue_text:
             embed.add_field(name="Up Next", value=queue_text, inline=False)
 
-        await ctx.send(embed=embed)
+        await discord_message(ctx, embed=embed)
 
     async def handle_clear_command(self, ctx):
         """Clear the queue."""
         while not self.queue.empty():
             self.queue.get()
-        await ctx.send("Queue cleared! 🧹")
+        await discord_message(ctx, "Queue cleared! 🧹")
 
     async def handle_remove_command(self, ctx, position: int):
         """Remove a track from the queue."""
         if position < 1 or position > self.queue.qsize():
-            await ctx.send(
+            await discord_message(ctx, 
                 "You dont even have that many songs queued bruhhhh! Please check the queue first."
             )
             return
@@ -402,16 +403,16 @@ class MusicFeature(BotFeature):
         for track in queue_list:
             self.queue.put(track)
 
-        await ctx.send(f"Removed '{removed_track['title']}' from the queue! ❌")
+        await discord_message(ctx, f"Removed '{removed_track['title']}' from the queue! ❌")
 
     async def handle_volume_command(self, ctx, volume: int):
         """Set the volume."""
         if not 0 <= volume <= 100:
-            await ctx.send("Volume must be between 0 and 100!")
+            await discord_message(ctx, "Volume must be between 0 and 100!")
             return
 
         if not ctx.guild.voice_client:
-            await ctx.send(
+            await discord_message(ctx, 
                 "I NOT EVEN IN CALL WITH YOU!!! gonna make me dunb like you if i am in the call frfr"
             )
             return
@@ -420,18 +421,18 @@ class MusicFeature(BotFeature):
         if ctx.guild.voice_client.source:
             ctx.guild.voice_client.source.volume = self.volume
 
-        await ctx.send(f"Volume set to {volume}% 🔊")
+        await discord_message(ctx, f"Volume set to {volume}% 🔊")
 
     async def handle_loop_command(self, ctx):
         """Toggle loop mode."""
         self.loop = not self.loop
         status = "enabled" if self.loop else "disabled"
-        await ctx.send(f"Loop mode {status} 🔁")
+        await discord_message(ctx, f"Loop mode {status} 🔁")
 
     async def handle_now_playing_command(self, ctx):
         """Show the currently playing track."""
         if not self.current_track:
-            await ctx.send("Nothing is playing right now!")
+            await discord_message(ctx, "Nothing is playing right now!")
             return
 
         embed = discord.Embed(
@@ -441,12 +442,12 @@ class MusicFeature(BotFeature):
         )
         embed.add_field(name="Duration", value=self.current_track["duration"])
 
-        await ctx.send(embed=embed)
+        await discord_message(ctx, embed=embed)
 
     async def handle_seek_command(self, ctx, timestamp: str):
         """Seek to a position in the track."""
         if not ctx.guild.voice_client or not ctx.guild.voice_client.is_playing():
-            await ctx.send(
+            await discord_message(ctx, 
                 "YOU DEAF OR WHAT... NOTHING EVEN BEING PLAYE I SEEK YOUR MUM OUT LAH!"
             )
             return
@@ -459,22 +460,22 @@ class MusicFeature(BotFeature):
             else:
                 seek_position = int(timestamp)
 
-            await ctx.send(f"Seeking to {timestamp}... ⏩")
+            await discord_message(ctx, f"Seeking to {timestamp}... ⏩")
 
         except ValueError:
-            await ctx.send("Invalid timestamp format! Use MM:SS or seconds.")
+            await discord_message(ctx, "Invalid timestamp format! Use MM:SS or seconds.")
 
     async def handle_replay_command(self, ctx):
         """Replay the current track."""
         if not self.current_track:
-            await ctx.send(
+            await discord_message(ctx, 
                 "NOTHING IS EVEN BEING PLAYED! Are you DEAF {ctx.author.id}?"
             )
             return
 
         voice_client = ctx.guild.voice_client
         if not voice_client:
-            await ctx.send(
+            await discord_message(ctx, 
                 "I NOT EVEN IN CALL WITH YOU!!! gonna make me dunb like you if i am in the call frfr"
             )
             return
@@ -491,12 +492,12 @@ class MusicFeature(BotFeature):
             asyncio.run_coroutine_threadsafe(self.play_next(ctx), self.bot.loop)
 
         voice_client.play(audio, after=after_playing)
-        await ctx.send(f"🔄 Replaying: {self.current_track['title']}")
+        await discord_message(ctx, f"🔄 Replaying: {self.current_track['title']}")
 
     async def handle_lyrics_command(self, ctx, song_name: str = None):
         """Fetch and display lyrics."""
         if not song_name and not self.current_track:
-            await ctx.send("Either specify a song or play something first!")
+            await discord_message(ctx, "Either specify a song or play something first!")
             return
 
         search_query = song_name if song_name else self.current_track["title"]
@@ -509,7 +510,7 @@ class MusicFeature(BotFeature):
         search_query = search_query.strip()
 
         try:
-            searching_msg = await ctx.send(
+            searching_msg = await discord_message(ctx, 
                 f"🔎 Searching for lyrics of: {search_query}"
             )
             lyrics = await self.fetch_lyrics(search_query)
@@ -535,11 +536,11 @@ class MusicFeature(BotFeature):
                 )
                 if i == 0:
                     embed.set_footer(text="Lyrics powered by Genius")
-                await ctx.send(embed=embed)
+                await discord_message(ctx, embed=embed)
 
         except Exception as e:
             self.logger.error(f"Error fetching lyrics: {e}")
-            await ctx.send("❌ An error occurred while fetching lyrics!")
+            await discord_message(ctx, "❌ An error occurred while fetching lyrics!")
 
     async def fetch_lyrics(self, song_name: str) -> str:
         """Fetch lyrics from Genius API."""

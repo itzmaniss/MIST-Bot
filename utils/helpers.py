@@ -48,10 +48,8 @@ def format_timedelta(delta):
     return f"{hours}h {minutes}m {seconds}s"
 
 async def discord_message(ctx, msg) -> None:
-    print(ctx.message)
     try:
         await ctx.send(msg)
     except Exception as e:
-        # If the interaction is no longer valid, try sending a regular message
+        # If the interaction is no longer valid, try sending a regular message (This should be used as a last resort)
         await ctx.channel.send(msg)
-        print(e.args[0])

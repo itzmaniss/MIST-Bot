@@ -46,7 +46,7 @@ class MinecraftFeature(BotFeature):
             await self.handle_stop_command(ctx, server)
 
     async def handle_start_command(self, ctx, arg):
-
+        await ctx.defer()
         logger.info(
             f"{ctx.author} has used to start command at {get_timestamp()} for {arg}"
         )
@@ -99,7 +99,7 @@ class MinecraftFeature(BotFeature):
             await discord_message(ctx, f"Start process has failed.")
 
     async def handle_stop_command(self, ctx, arg) -> None:
-
+        await ctx.defer()
         if ctx.channel.name not in Config.ALLOWED_CHANNELS:
             logger.error(f"Wrong Channel. {ctx.channel.name} was used instead.")
             await discord_message(ctx, 

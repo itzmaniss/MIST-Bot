@@ -254,6 +254,7 @@ class MusicFeature(BotFeature):
 
     async def handle_play_command(self, ctx, query: str):
         """Handle playing a track."""
+        await ctx.defer()
         if not self.in_call(ctx):
             await self.handle_join_command(ctx, None)
 

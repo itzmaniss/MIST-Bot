@@ -53,3 +53,4 @@ async def discord_message(ctx, msg) -> None:
     except Exception as e:
         # If the interaction is no longer valid, try sending a regular message
         await ctx.channel.send(msg)
+        Logger.error(e.args[0])

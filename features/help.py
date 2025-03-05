@@ -1,7 +1,7 @@
 from features.base import BotFeature
 from config.config import Config
 from utils.logger import Logger
-
+from utils.helpers import discord_message
 
 class HelpFeature(BotFeature):
     def __init__(self, bot):
@@ -15,7 +15,7 @@ class HelpFeature(BotFeature):
             name="help", with_app_command=True, description="Shows all commands"
         )
         async def help(ctx):
-            await ctx.send(
+            await discord_message(ctx, 
                 """```
 ### Minecraft Server Management
 

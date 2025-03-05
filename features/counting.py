@@ -1,6 +1,7 @@
 from features.base import BotFeature
 from utils.logger import Logger
 from utils.counter import CounterUtils
+from utils.helpers import discord_message
 from config.config import Config
 import discord
 from discord.ext import commands
@@ -165,13 +166,13 @@ class CountingFeature(BotFeature):
             inline=False,
         )
 
-        await ctx.send(embed=embed)
+        await discord_message(ctx, embed=embed)
 
     async def handle_stats_command(self, ctx, user: discord.Member):
         """Handle the count_stats command."""
         stats = self.counter.get_user_stats(str(ctx.guild.id), str(user.id))
         if not stats:
-            await ctx.send(f"{user.mention} hasn't counted anything yet!")
+            await discord_message(ctx, f"{user.mention} hasn't counted anything yet!")
             return
 
         embed = discord.Embed(
@@ -199,7 +200,7 @@ class CountingFeature(BotFeature):
                 inline=True,
             )
 
-        await ctx.send(embed=embed)
+        await discord_message(ctx, embed=embed)
 
     async def handle_top_command(self, ctx):
         """Handle the count_top command."""
@@ -219,7 +220,7 @@ class CountingFeature(BotFeature):
     async def send_leaderboard(self, ctx, title: str, leaders):
         """Helper function to send a leaderboard embed."""
         if not leaders:
-            await ctx.send("No data available for the leaderboard!")
+            await discord_message(ctx, "No data available for the leaderboard!")
             return
 
         embed = discord.Embed(title=title, color=0x3498DB)
@@ -234,9 +235,9 @@ class CountingFeature(BotFeature):
                     name=f"#{i} Unknown User", value=str(score), inline=False
                 )
 
-        await ctx.send(embed=embed)
+        await discord_message(ctx, embed=embed)
 
     async def handle_next_prime_command(self, ctx):
         """Handle the next_prime command."""
         next_prime = self.counter.get_next_prime(str(ctx.guild.id))
-        await ctx.send(f"The next prime number is {next_prime}")
+        await discord_message(ctx, f"The next prime number is {next_prime}")

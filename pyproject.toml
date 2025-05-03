@@ -1,0 +1,17 @@
+[project]
+name = "discord-bot"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = "~=3.9"
+dependencies = [
+    "discord-py>=2.3.2",
+    "httpx>=0.26.0",
+    "mcstatus==11.1.1",
+    "numpy==2.0.2",
+    "pynacl==1.5.0",
+    "python-dotenv>=1.0.0",
+    "toml==0.10.2",
+    "word2number==1.1",
+    "yt-dlp>=2023.12.30",
+]

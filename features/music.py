@@ -2,7 +2,7 @@ from features.base import BotFeature
 from utils.logger import Logger
 from config.config import Config
 from utils.cache import MusicCache
-from utils.helpers import discord_message
+from utils.helpers import discord_message, discord_embed
 import queue
 import yt_dlp
 import discord
@@ -14,7 +14,7 @@ from discord import app_commands
 
 
 # un-comment for mac
-# discord.opus.load_opus("/opt/homebrew/Cellar/opus/1.5.2/lib/libopus.0.dylib")
+discord.opus.load_opus("/opt/homebrew/Cellar/opus/1.5.2/lib/libopus.0.dylib")
 
 
 class MusicFeature(BotFeature):
@@ -26,7 +26,7 @@ class MusicFeature(BotFeature):
             "format": "bestaudio/best",
             "noplaylist": True,
             "quiet": True,
-            "extract_flat": False,  # Changed to False to get full extraction
+            "extract_flat": False,
             "postprocessors": [
                 {
                     "key": "FFmpegExtractAudio",
@@ -35,6 +35,21 @@ class MusicFeature(BotFeature):
                 }
             ],
         }
+
+        self.playlist_opts = {
+            "format": "bestaudio/best",
+            "noplaylist": False,
+            "quiet": True,
+            "extract_flat": "in_playlist",
+            "postprocessors": [
+                {
+                    "key": "FFmpegExtractAudio",
+                    "preferredcodec": "wav",
+                    "preferredquality": "320",
+                }
+            ],
+        }
+
         self.ffmpeg_opts = {
             "options": "-vn -b:a 192k",
             "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
@@ -42,6 +57,8 @@ class MusicFeature(BotFeature):
         self.config = Config()
         self.logger = Logger("Music Bot")
         self.cache = MusicCache()
+        self.pending_playlist_tracks = []
+        self.is_processing_playlist = False
 
         # Player state
         self.queue = queue.Queue()
@@ -183,36 +200,73 @@ class MusicFeature(BotFeature):
         async def lyrics(ctx, *, song_name: str = None):
             await self.handle_lyrics_command(ctx, song_name)
 
-    def search_music(self, query):
-        # # Check cache first
-        # cached_data = self.cache.get(query)
-        # if cached_data:
-        #     return cached_data  # Use cached data if available
-
-        # If not in cache, fetch from YouTube
-        result = self.fetch_from_youtube(query)
-
-        # # Update cache (automatically saves to disk)
-        # if result:
-        #     self.cache.update(query, result)
-
+    #check if the url is a playlist url
+    def is_playlist(self, url: str) -> bool:
+        return "list=" in url and "youtube.com" in url
+    
+    async def search_music(self, query: str, url: bool=False):
+    # Make this function truly asynchronous by moving the yt-dlp operation to a thread
+    # Use a thread pool to handle the CPU-bound yt-dlp operation
+        loop = asyncio.get_event_loop()
+        result = await loop.run_in_executor(
+            None,  # Use default executor
+            lambda: self.fetch_from_youtube(query, url)
+        )
         return result
 
-    def fetch_from_youtube(self, query):
+    def fetch_from_youtube(self, query: str, url: bool):
+        """This function runs in a separate thread"""
         try:
             with yt_dlp.YoutubeDL(self.ydl_opts) as ydl:
-                info = ydl.extract_info(f"ytsearch:{query}", download=False)["entries"][
-                    0
-                ]
+                if url:
+                    info = ydl.extract_info(query, download=False)
+                else:
+                    info = ydl.extract_info(f"ytsearch:{query}", download=False)["entries"][0]
             return {
                 "url": info["url"],
                 "title": info["title"],
                 "duration": info["duration"],
             }
-
         except Exception as e:
-            self.logger.error(e)
+            self.logger.error(f"Error fetching from YouTube: {e}")
             return None
+
+    async def search_playlist(self, url):
+        """Move playlist extraction to a thread as well"""
+        loop = asyncio.get_event_loop()
+        result = await loop.run_in_executor(
+            None,
+            lambda: self._extract_playlist(url)
+        )
+        return result
+
+    def _extract_playlist(self, url):
+        """This runs in a separate thread"""
+        try:
+            with yt_dlp.YoutubeDL(self.playlist_opts) as ydl:
+                playlist_info = ydl.extract_info(url, download=False)
+                if 'entries' in playlist_info:
+                    return playlist_info["entries"]
+                else:
+                    self.logger.error("No entries found in playlist")
+                    return []
+        except Exception as e:
+            self.logger.error(f"Error fetching playlist: {e}")
+            return []
+        
+    async def process_intermediate_queue(self, ctx):
+        while self.is_processing_playlist:
+            track = self.pending_playlist_tracks.pop(0)
+            if track.get("searched"):
+                self.queue.put(track.pop("searched"))
+            else:
+                self.logger.info("Adding {}".format(track.get("title")))
+                self.queue.put(await self.search_music(track.get("url"), True))
+
+            if len(self.pending_playlist_tracks) == 0:
+                self.is_processing_playlist = False
+
+        await discord_message(ctx, "Added the playlist to the queue... I THINK?!")
 
     def in_call(self, ctx) -> bool:
         """Check if bot is in a voice call."""
@@ -258,15 +312,37 @@ class MusicFeature(BotFeature):
         if not self.in_call(ctx):
             await self.handle_join_command(ctx, None)
 
-        track_info = self.search_music(query)
-        if not track_info:
-            await discord_message(ctx, 
-                "Your song search as real as your gf... Search a real song leh... 😕"
-            )
-            return
+        if self.is_playlist(query):
+            self.logger.info("Searching for a playlist")
+            tracks = await self.search_playlist(query)
+            if tracks:
+                self.logger.info("Adding the songs in the playlist to the queue")
+                if not self.is_processing_playlist:
+                    track_info = await self.search_music(tracks.pop(0).get("url"), True)
+                    self.queue.put(track_info)
+                    if not ctx.guild.voice_client.is_playing():
+                        await self.play_next(ctx)
+                self.pending_playlist_tracks.extend(tracks)
+                self.is_processing_playlist = True
+                asyncio.create_task(self.process_intermediate_queue(ctx))
 
-        self.queue.put(track_info)
-        await discord_message(ctx, f"Added to queue: {track_info['title']} 🎵")
+            else:
+                self.logger.error(f"There is no such playlist? i think? idk man {query}")
+                await discord_message(ctx, "Hais.. send me on wild goose chase for a playlist that dont exist? you gotta be kidding me")
+        
+        else:
+            track_info = await self.search_music(query)
+            if not track_info:
+                await discord_message(ctx, 
+                    "Your song search as real as your gf... Search a real song leh... 😕"
+                )
+                return
+            if self.is_processing_playlist:
+                track_info["searched"] = True
+                self.pending_playlist_tracks.extend([track_info,])
+            else:
+                self.queue.put(track_info)
+            await discord_message(ctx, f"Added to queue: {track_info['title']} 🎵")
 
         if not ctx.guild.voice_client.is_playing():
             await self.play_next(ctx)
@@ -350,28 +426,38 @@ class MusicFeature(BotFeature):
         await discord_message(ctx, "Bye bye! gonna go get more sleepz than all of yall 👋")
 
     async def handle_queue_command(self, ctx):
-        """Show the current queue."""
         if self.queue.empty():
-            await discord_message(ctx, "Theres nothing left to be played. ADD MORE NOWWW!")
+            await discord_message(ctx, "Queue is empty! Add some songs.")
             return
 
         queue_list = list(self.queue.queue)
-
         embed = discord.Embed(title="Current Queue 🎵", color=0x1DB954)
-
+        
         # Add current track
-        if self.current_track:
-            embed.add_field(
-                name="Now Playing",
-                value=f"🎵 {self.current_track['title']} [{self.current_track['duration']}]",
-                inline=False,
-            )
-
+        if self.current_track and isinstance(self.current_track, dict):
+            try:
+                embed.add_field(
+                    name="Now Playing",
+                    value=f"🎵 {self.current_track.get('title', 'Unknown')} [{self.current_track.get('duration', '?')}]",
+                    inline=False,
+                )
+            except Exception as e:
+                self.logger.error(f"Error displaying current track: {e}")
+                embed.add_field(name="Now Playing", value="Error displaying current track", inline=False)
+        
         # Add queue
         queue_text = ""
         for i, track in enumerate(queue_list, 1):
-            queue_text += f"{i}. {track['title']} [{track['duration']}]\n"
-
+            try:
+                if isinstance(track, dict) and 'title' in track and 'duration' in track:
+                    queue_text += f"{i}. {track['title']} [{track['duration']}]\n"
+                else:
+                    queue_text += f"{i}. [Invalid track format]\n"
+                    self.logger.error(f"Invalid track format in queue position {i}: {type(track)}")
+            except Exception as e:
+                queue_text += f"{i}. [Error displaying track]\n"
+                self.logger.error(f"Error displaying track at position {i}: {e}")
+            
             if i >= 10:  # Show only first 10 items
                 remaining = self.queue.qsize() - 10
                 if remaining > 0:
@@ -381,7 +467,7 @@ class MusicFeature(BotFeature):
         if queue_text:
             embed.add_field(name="Up Next", value=queue_text, inline=False)
 
-        await discord_message(ctx, embed=embed)
+        await discord_embed(ctx, embed)
 
     async def handle_clear_command(self, ctx):
         """Clear the queue."""

@@ -289,35 +289,6 @@ wheels = [
 ]
 
 [[package]]
-name = "discord-bot"
-version = "0.1.0"
-source = { virtual = "." }
-dependencies = [
-    { name = "discord-py" },
-    { name = "httpx" },
-    { name = "mcstatus" },
-    { name = "numpy" },
-    { name = "pynacl" },
-    { name = "python-dotenv" },
-    { name = "toml" },
-    { name = "word2number" },
-    { name = "yt-dlp" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "discord-py", specifier = ">=2.3.2" },
-    { name = "httpx", specifier = ">=0.26.0" },
-    { name = "mcstatus", specifier = "==11.1.1" },
-    { name = "numpy", specifier = "==2.0.2" },
-    { name = "pynacl", specifier = "==1.5.0" },
-    { name = "python-dotenv", specifier = ">=1.0.0" },
-    { name = "toml", specifier = "==0.10.2" },
-    { name = "word2number", specifier = "==1.1" },
-    { name = "yt-dlp", specifier = ">=2023.12.30" },
-]
-
-[[package]]
 name = "discord-py"
 version = "2.5.2"
 source = { registry = "https://pypi.org/simple" }
@@ -516,6 +487,35 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/ff/ad/2d0b0cdde02cb505221d5078c91c8123fbc5e467b56983b2321e45bb1858/mcstatus-11.1.1.tar.gz", hash = "sha256:b2856ee4032faf810b0c6af10a141381e6115caf14a7348c47edc8e3da84f5d4", size = 32949, upload-time = "2024-01-02T07:39:51.118Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/eb/f2/a39110f7982e5903314cb73912541932b13b9f95b010a81173854350121d/mcstatus-11.1.1-py3-none-any.whl", hash = "sha256:7f5f7f44fa1d17c4e05c0ae94ecc114d9d146ef572e7dd9f2d9da72771ce135c", size = 37422, upload-time = "2024-01-02T07:39:49.277Z" },
+]
+
+[[package]]
+name = "mist-bot"
+version = "1.0.5"
+source = { virtual = "." }
+dependencies = [
+    { name = "discord-py" },
+    { name = "httpx" },
+    { name = "mcstatus" },
+    { name = "numpy" },
+    { name = "pynacl" },
+    { name = "python-dotenv" },
+    { name = "toml" },
+    { name = "word2number" },
+    { name = "yt-dlp" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "discord-py", specifier = ">=2.3.2" },
+    { name = "httpx", specifier = ">=0.26.0" },
+    { name = "mcstatus", specifier = "==11.1.1" },
+    { name = "numpy", specifier = "==2.0.2" },
+    { name = "pynacl", specifier = "==1.5.0" },
+    { name = "python-dotenv", specifier = ">=1.0.0" },
+    { name = "toml", specifier = "==0.10.2" },
+    { name = "word2number", specifier = "==1.1" },
+    { name = "yt-dlp", specifier = ">=2023.12.30" },
 ]
 
 [[package]]

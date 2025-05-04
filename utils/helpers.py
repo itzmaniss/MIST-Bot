@@ -53,3 +53,9 @@ async def discord_message(ctx, msg) -> None:
     except Exception as e:
         # If the interaction is no longer valid, try sending a regular message (This should be used as a last resort)
         await ctx.channel.send(msg)
+
+async def discord_embed(ctx, embed) -> None:
+    try:
+        await ctx.send(embed=embed)
+    except Exception as e:
+        await ctx.channel.send(embed=embed)

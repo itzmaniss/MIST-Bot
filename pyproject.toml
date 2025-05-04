@@ -1,7 +1,7 @@
 [project]
-name = "discord-bot"
-version = "0.1.0"
-description = "Add your description here"
+name = "MIST-bot"
+version = "1.0.5"
+description = "A Multi-Purpose Discord bot"
 readme = "README.md"
 requires-python = "~=3.9"
 dependencies = [

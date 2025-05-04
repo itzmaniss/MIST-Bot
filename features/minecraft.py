@@ -58,7 +58,7 @@ class MinecraftFeature(BotFeature):
 
         if ctx.author.id not in Config.ALLOWED_USERS:
             if (datetime.now() - self.last_start) <= timedelta(minutes=59):
-                error_message = f"It has only been {format_timedelta(get_timestamp() - self.last_start)} since the server was last started by as user please try again at {(self.last_start + timedelta(hours=1)).strftime('%Y-%m-%d %H:%M')}"
+                error_message = f"It has only been {format_timedelta(datetime.now() - self.last_start)} since the server was last started by as user please try again at {(self.last_start + timedelta(hours=1)).strftime('%Y-%m-%d %H:%M')}"
                 logger.error(error_message)
                 await discord_message(ctx, error_message)
                 raise Exception("Spamming Start!")
@@ -92,7 +92,7 @@ class MinecraftFeature(BotFeature):
             logger.info(message)
             await discord_message(ctx, message)
             if ctx.author.id not in Config.ALLOWED_USERS:
-                self.last_start = get_timestamp()
+                self.last_start = datetime.now()
 
         except Exception as e:
             logger.error(e)

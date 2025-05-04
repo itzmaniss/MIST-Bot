@@ -1,7 +1,7 @@
 from core.bot import DiscordBot
 from features.minecraft import MinecraftFeature
 from features.music import MusicFeature
-from features.smoking import SmokingFeature
+from features.troll import TrollFeature
 from features.help import HelpFeature
 from features.counting import CountingFeature
 from utils.logger import Logger
@@ -18,7 +18,7 @@ def main():
     # Load features
     MinecraftFeature(bot)
     MusicFeature(bot)
-    SmokingFeature(bot)
+    TrollFeature(bot)
     HelpFeature(bot)
     CountingFeature(bot)
 

@@ -7,7 +7,7 @@ import discord
 from discord import app_commands
 
 
-class SmokingFeature(BotFeature):
+class TrollFeature(BotFeature):
     def __init__(self, bot):
         BotFeature.__init__(self, bot)
         self.ongoing_pings = {}

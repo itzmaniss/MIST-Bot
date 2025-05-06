@@ -5,6 +5,7 @@ description = "A Multi-Purpose Discord bot"
 readme = "README.md"
 requires-python = "~=3.9"
 dependencies = [
+    "black>=25.1.0",
     "discord-py>=2.3.2",
     "httpx>=0.26.0",
     "mcstatus==11.1.1",

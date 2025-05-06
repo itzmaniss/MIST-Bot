@@ -3,6 +3,7 @@ from config.config import Config
 from utils.logger import Logger
 from utils.helpers import discord_message
 
+
 class HelpFeature(BotFeature):
     def __init__(self, bot):
         BotFeature.__init__(self, bot)
@@ -15,7 +16,8 @@ class HelpFeature(BotFeature):
             name="help", with_app_command=True, description="Shows all commands"
         )
         async def help(ctx):
-            await discord_message(ctx, 
+            await discord_message(
+                ctx,
                 """```
 ### Minecraft Server Management
 
@@ -42,5 +44,5 @@ class HelpFeature(BotFeature):
 
 - `/wakey <user>`: "Wake up" a user by pinging them repeatedly. Only available to users with the "smoker" role and usable in designated channels.
 - `/woken`: Stop the pinging for a user.The pinging for the user who used the command will be stopped.
-                           ```"""
+                           ```""",
             )

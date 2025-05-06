@@ -1,6 +1,11 @@
 from features.base import BotFeature
 from config.config import Config
-from utils.helpers import get_timestamp, players_online, format_timedelta, discord_message
+from utils.helpers import (
+    get_timestamp,
+    players_online,
+    format_timedelta,
+    discord_message,
+)
 from utils.logger import Logger
 from core.server_manager import ServerManager
 from datetime import timedelta, datetime
@@ -53,7 +58,9 @@ class MinecraftFeature(BotFeature):
 
         if ctx.channel.name not in Config.ALLOWED_CHANNELS:
             logger.error(f"Wrong Channel. {ctx.channel.name} was used instead.")
-            await discord_message(ctx, f"Please use the correct channel: {Config.ALLOWED_CHANNELS}")
+            await discord_message(
+                ctx, f"Please use the correct channel: {Config.ALLOWED_CHANNELS}"
+            )
             raise Exception("Incorrect Channel")
 
         if ctx.author.id not in Config.ALLOWED_USERS:
@@ -76,13 +83,15 @@ class MinecraftFeature(BotFeature):
                     response.json()["data"]
                     == "The instance is running and cannot be started again"
                 ):
-                    await discord_message(ctx, 
-                        "you idot, the serer is alreadu on. stop spamning or i come to ur house and slap u"
+                    await discord_message(
+                        ctx,
+                        "you idot, the serer is alreadu on. stop spamning or i come to ur house and slap u",
                     )
                     raise Exception("idot turning on server thats alr on")
                 else:
-                    await discord_message(ctx, 
-                        "Contact <@304976615723499533> or <@476162085827379231> to turn on machine then try again."
+                    await discord_message(
+                        ctx,
+                        "Contact <@304976615723499533> or <@476162085827379231> to turn on machine then try again.",
                     )
                     raise Exception("Machine is turned off")
             elif response.status_code != 200:
@@ -102,8 +111,8 @@ class MinecraftFeature(BotFeature):
         await ctx.defer()
         if ctx.channel.name not in Config.ALLOWED_CHANNELS:
             logger.error(f"Wrong Channel. {ctx.channel.name} was used instead.")
-            await discord_message(ctx, 
-                f"Please use the correct channel " + str(Config.ALLOWED_CHANNELS)
+            await discord_message(
+                ctx, f"Please use the correct channel " + str(Config.ALLOWED_CHANNELS)
             )
             raise Exception("Incorrect Channel")
 
@@ -131,8 +140,9 @@ class MinecraftFeature(BotFeature):
 
         except Exception as e:
             logger.error(e)
-            await discord_message(ctx, 
-                "the serevr is alreigty down you iiot. shoo. turn around 180 degrees, and walk straight for me pls tq :3"
+            await discord_message(
+                ctx,
+                "the serevr is alreigty down you iiot. shoo. turn around 180 degrees, and walk straight for me pls tq :3",
             )
             raise Exception("server down")
 
@@ -143,21 +153,23 @@ class MinecraftFeature(BotFeature):
             if (
                 "The remote node is unavailable!" in response.json()["data"]
             ):  # should not happen
-                await discord_message(ctx, 
-                    "the machine is of idiot, can u not spam or misuse the command pls."
+                await discord_message(
+                    ctx,
+                    "the machine is of idiot, can u not spam or misuse the command pls.",
                 )
                 raise Exception("machine off")
             elif (
                 response.json()["data"]
                 == "The instance is not running and cannot be stopped."
             ):
-                await discord_message(ctx, 
-                    "Verily, thou dolt, the server hath long since been extinguished!"
+                await discord_message(
+                    ctx,
+                    "Verily, thou dolt, the server hath long since been extinguished!",
                 )
                 raise Exception("stupid")
             else:
-                await discord_message(ctx, 
-                    "I also dk why it never work... never bothered testing :)"
+                await discord_message(
+                    ctx, "I also dk why it never work... never bothered testing :)"
                 )
                 raise Exception("IDK WHATS WRONG ALSO!!!")
 

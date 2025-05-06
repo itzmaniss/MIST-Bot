@@ -78,29 +78,33 @@ class CountingFeature(BotFeature):
 
     async def process_count(self, message):
         """Process a counting message."""
-        self.logger.info(f"Message received from {message.author.name}: {message.content}")
-        
+        self.logger.info(
+            f"Message received from {message.author.name}: {message.content}"
+        )
+
         # First check if this looks like a counting attempt
         # Try to evaluate the expression first
         evaluated_value = self.counter._evaluate_expression(message.content)
-        
+
         # If we couldn't evaluate it as a number, treat it as regular chat
         if evaluated_value is None:
             # Allow regular chat messages to pass through without any reaction
             return
-                
+
         # At this point, we know it's a counting attempt
-        self.logger.info(f"Count attempt from {message.author.name}: {message.content} (evaluated to: {evaluated_value})")
-        
+        self.logger.info(
+            f"Count attempt from {message.author.name}: {message.content} (evaluated to: {evaluated_value})"
+        )
+
         # Validate the count
         result = self.counter.validate_count(
-            str(evaluated_value),
-            str(message.guild.id),
-            str(message.author.id)
+            str(evaluated_value), str(message.guild.id), str(message.author.id)
         )
 
         if not result:
-            self.logger.error(f"Invalid count from {message.author.name}: {message.content} (evaluated to: {evaluated_value})")
+            self.logger.error(
+                f"Invalid count from {message.author.name}: {message.content} (evaluated to: {evaluated_value})"
+            )
             await message.add_reaction("❌")
             await message.channel.send(
                 f"{message.author.mention} ruined the count! Starting over from 1.\n"
@@ -112,20 +116,25 @@ class CountingFeature(BotFeature):
 
         if is_valid:
             count_value = evaluated_value
-            self.logger.info(f"Valid count from {message.author.name}: {count_value}" + (" (PRIME)" if is_prime else ""))
-            
+            self.logger.info(
+                f"Valid count from {message.author.name}: {count_value}"
+                + (" (PRIME)" if is_prime else "")
+            )
+
             # Log milestones
             if count_value % 100 == 0:
                 self.logger.info(f"Century milestone reached: {count_value}")
             if count_value % 1000 == 0:
                 self.logger.info(f"Millennium milestone reached: {count_value}")
-                
+
             if is_prime:
                 await message.add_reaction("🔢")
             else:
                 await message.add_reaction("✅")
         else:
-            self.logger.error(f"Invalid sequence from {message.author.name}: expected next number")
+            self.logger.error(
+                f"Invalid sequence from {message.author.name}: expected next number"
+            )
             await message.add_reaction("❌")
             await message.channel.send(
                 f"{message.author.mention} ruined the count! Starting over from 1."

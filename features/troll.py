@@ -29,7 +29,9 @@ class TrollFeature(BotFeature):
                 await self.handle_wakey(ctx, user)
             except Exception as e:
                 self.logger.error(f"Error in wakey command: {e}")
-                await discord_message(ctx, "An error occurred while processing the command.")
+                await discord_message(
+                    ctx, "An error occurred while processing the command."
+                )
 
         @self.bot.hybrid_command(
             name="woken", with_app_command=True, description="off snooze"
@@ -43,7 +45,9 @@ class TrollFeature(BotFeature):
                     await self.handle_woken(ctx, user)
                 except Exception as e:
                     self.logger.error(f"Error in wakey command: {e}")
-                    await discord_message(ctx, "An error occurred while processing the command.")
+                    await discord_message(
+                        ctx, "An error occurred while processing the command."
+                    )
 
         @self.bot.hybrid_command(
             name="test", with_app_command=True, description="useless command"
@@ -100,7 +104,9 @@ class TrollFeature(BotFeature):
             for _ in range(20):
                 if not self.ongoing_pings.get(user, False):
                     break
-                await discord_message(ctx, f"wake up {user}.Time to smoke you {self.config.WORD_1}")
+                await discord_message(
+                    ctx, f"wake up {user}.Time to smoke you {self.config.WORD_1}"
+                )
                 await asyncio.sleep(1)
         except Exception as e:
             self.logger.error(f"Error in handle_wakey: {e}")

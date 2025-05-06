@@ -14,7 +14,7 @@ from discord import app_commands
 
 
 # un-comment for mac
-discord.opus.load_opus("/opt/homebrew/Cellar/opus/1.5.2/lib/libopus.0.dylib")
+# discord.opus.load_opus("/opt/homebrew/Cellar/opus/1.5.2/lib/libopus.0.dylib")
 
 
 class MusicFeature(BotFeature):
@@ -261,10 +261,15 @@ class MusicFeature(BotFeature):
                 self.queue.put(track.pop("searched"))
             else:
                 self.logger.info("Adding {}".format(track.get("title")))
-                self.queue.put(await self.search_music(track.get("url"), True))
+                track_info = await self.search_music(track.get("url"), True)
+                if track_info:
+                    self.queue.put(track_info)
+                else:
+                    self.logger.error(track_info)
 
             if len(self.pending_playlist_tracks) == 0:
                 self.is_processing_playlist = False
+            asyncio.sleep(0.1)
 
         await discord_message(ctx, "Added the playlist to the queue... I THINK?!")
 
@@ -391,6 +396,9 @@ class MusicFeature(BotFeature):
             voice_client.resume()
             await discord_message(ctx, "Resumed! ▶️")
         else:
+            if not self.queue.empty():
+                await self.play_next(ctx)
+
             await discord_message(ctx, 
                 "NOTHING IS EVEN BEING PLAYED! Are you stupid {ctx.author.id}?"
             )

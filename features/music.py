@@ -11,11 +11,27 @@ import aiohttp
 import re
 from typing import List, Dict
 from discord import app_commands
+import platform
+import subprocess
+import os
 
+# Load opus on macOS
+if platform.system() == "Darwin":
+    try:
+        # Get opus library path from Homebrew
+        result = subprocess.run(
+            ["brew", "--prefix", "opus"],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        opus_prefix = result.stdout.strip()
+        opus_path = os.path.join(opus_prefix, "lib", "libopus.0.dylib")
 
-# un-comment for mac
-#update opus version if necessary
-# discord.opus.load_opus("/opt/homebrew/Cellar/opus/1.6.1/lib/libopus.0.dylib")
+        if os.path.exists(opus_path):
+            discord.opus.load_opus(opus_path)
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        pass
 
 
 class MusicFeature(BotFeature):

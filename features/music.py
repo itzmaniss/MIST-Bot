@@ -14,7 +14,8 @@ from discord import app_commands
 
 
 # un-comment for mac
-# discord.opus.load_opus("/opt/homebrew/Cellar/opus/1.5.2/lib/libopus.0.dylib")
+#update opus version if necessary
+# discord.opus.load_opus("/opt/homebrew/Cellar/opus/1.6.1/lib/libopus.0.dylib")
 
 
 class MusicFeature(BotFeature):

@@ -1,0 +1,14 @@
+MCM.log
+MCMDB.zip
+mcsmanager.py
+*.log
+.*
+!.env.example
+config.toml
+music_cache.json
+
+__pycache__/
+venv/
+
+utils/config_manager.py
+*.db
